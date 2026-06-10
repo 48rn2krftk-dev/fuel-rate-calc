@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { calculateDeviation, calculateManual, parseFuel } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
 import { getSettings, subscribeSettingsChange } from "../utils/storage";
+import { SaveResultPanel } from "../components/SaveResultPanel";
 
 function parseDurationToMinutes(value: string): number | null {
   const raw = value.trim().toLowerCase();
@@ -163,6 +164,8 @@ useEffect(() => {
             от нормы
           </p>
         )}
+
+        <SaveResultPanel result={calculation} defaultTitle="Быстрый расчёт" />
       </div>
     </section>
   );

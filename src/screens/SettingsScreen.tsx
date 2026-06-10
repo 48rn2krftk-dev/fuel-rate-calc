@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import type { AppSettings } from "../types";
 import { parseFuel } from "../utils/calculations";
-import { formatNumber } from "../utils/format";
-import { getSettings, saveSettings } from "../utils/storage";
+import { formatNumber, formatTime } from "../utils/format";
+import {
+  clearSlot,
+  getSettings,
+  getSlots,
+  saveSettings,
+  subscribeSlotsChange,
+} from "../utils/storage";
 
 export function SettingsScreen() {
   const [settings, setSettings] = useState<AppSettings>(() => getSettings());
   const [normInput, setNormInput] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
+  const [slots, setSlots] = useState(() => getSlots());
 
   useEffect(() => {
     setNormInput(
@@ -16,6 +23,12 @@ export function SettingsScreen() {
         : formatNumber(settings.normFuelPerHour)
     );
   }, [settings.normFuelPerHour]);
+
+  useEffect(() => {
+  return subscribeSlotsChange(() => {
+    setSlots(getSlots());
+  });
+}, []);
 
   const parsedNorm = normInput.trim() === "" ? null : parseFuel(normInput);
   const normError = normInput.trim() !== "" && parsedNorm === null;
@@ -99,6 +112,44 @@ export function SettingsScreen() {
 
         {savedMessage && <div className="successBox">{savedMessage}</div>}
       </div>
+
+<div className="card">
+  <div className="sectionTitle">
+    <h2>Слоты сохранения</h2>
+    <p>Здесь хранятся временные сохранения для суммирования.</p>
+  </div>
+
+  <div className="slotList">
+    {slots.map((slot, index) => (
+      <div className="slotInfo" key={index}>
+        <div>
+          <b>Слот {index + 1}</b>
+
+          {slot ? (
+            <p>
+              {slot.title}
+              <br />
+              {formatTime(slot.minutes)} · {formatNumber(slot.fuelUsed)} кг ·{" "}
+              {formatNumber(slot.fuelPerHour)} кг/ч
+            </p>
+          ) : (
+            <p>Пустой</p>
+          )}
+        </div>
+
+        {slot && (
+          <button
+            className="dangerButton"
+            type="button"
+            onClick={() => clearSlot(index)}
+          >
+            Очистить
+          </button>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
 
       <div className="card">
         <div className="sectionTitle">

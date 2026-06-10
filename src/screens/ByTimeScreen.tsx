@@ -6,6 +6,7 @@ import {
 } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
 import { getSettings, subscribeSettingsChange } from "../utils/storage";
+import { SaveResultPanel } from "../components/SaveResultPanel";
 
 type ParsedDateTime =
   | {
@@ -453,6 +454,8 @@ useEffect(() => {
             от нормы
           </p>
         )}
+
+        <SaveResultPanel result={calculation} defaultTitle="Расчёт по времени" />
       </div>
     </section>
   );

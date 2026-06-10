@@ -36,11 +36,37 @@ export function getSlots(): Array<SlotData | null> {
     return [null, null, null];
   }
 
-  return JSON.parse(raw);
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (Array.isArray(parsed) && parsed.length === 3) {
+      return parsed;
+    }
+
+    return [null, null, null];
+  } catch {
+    return [null, null, null];
+  }
 }
 
 export function saveSlot(index: number, data: SlotData) {
   const slots = getSlots();
   slots[index] = data;
   localStorage.setItem(SLOTS_KEY, JSON.stringify(slots));
+  window.dispatchEvent(new Event("hotIdle.slotsChanged"));
+}
+
+export function clearSlot(index: number) {
+  const slots = getSlots();
+  slots[index] = null;
+  localStorage.setItem(SLOTS_KEY, JSON.stringify(slots));
+  window.dispatchEvent(new Event("hotIdle.slotsChanged"));
+}
+
+export function subscribeSlotsChange(callback: () => void) {
+  window.addEventListener("hotIdle.slotsChanged", callback);
+
+  return () => {
+    window.removeEventListener("hotIdle.slotsChanged", callback);
+  };
 }
