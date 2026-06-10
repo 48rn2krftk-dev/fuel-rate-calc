@@ -1,4 +1,4 @@
-import { Save } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CalculationResult, SlotData } from "../types";
 import { formatNumber, formatTime } from "../utils/format";
@@ -28,6 +28,15 @@ export function SaveResultPanel({
     setTitle(defaultTitle);
   }, [defaultTitle]);
 
+  function handleOpen() {
+    setTitle(defaultTitle);
+    setIsOpen(true);
+  }
+
+  function handleClose() {
+    setIsOpen(false);
+  }
+
   function handleSave(slotIndex: number) {
     if (!result) return;
 
@@ -52,7 +61,7 @@ export function SaveResultPanel({
         className="primaryButton saveButton"
         type="button"
         disabled={!result}
-        onClick={() => setIsOpen((value) => !value)}
+        onClick={handleOpen}
       >
         <Save size={18} />
         Сохранить
@@ -61,36 +70,62 @@ export function SaveResultPanel({
       {message && <div className="successBox">{message}</div>}
 
       {isOpen && result && (
-        <div className="saveDialog">
-          <label className="field">
-            <span>Название сохранения</span>
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Например 3ТЭ25К2М-697 секция 1"
-            />
-          </label>
+        <div className="modalOverlay" onClick={handleClose}>
+          <div
+            className="modalSheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Сохранение результата"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="modalHeader">
+              <div>
+                <h2>Сохранить результат</h2>
+                <p>Выбери слот для временного сохранения.</p>
+              </div>
 
-          <div className="slotList">
-            {slots.map((slot, index) => (
               <button
-                key={index}
-                className="slotButton"
+                className="iconButton"
                 type="button"
-                onClick={() => handleSave(index)}
+                onClick={handleClose}
+                aria-label="Закрыть"
               >
-                <span className="slotButtonTitle">Слот {index + 1}</span>
-
-                {slot ? (
-                  <span className="slotButtonMeta">
-                    {slot.title} · {formatTime(slot.minutes)} ·{" "}
-                    {formatNumber(slot.fuelPerHour)} кг/ч
-                  </span>
-                ) : (
-                  <span className="slotButtonMeta">Пустой</span>
-                )}
+                <X size={20} />
               </button>
-            ))}
+            </div>
+
+            <label className="field">
+              <span>Название сохранения</span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Например 3ТЭ25К2М-697 секция 1"
+                autoFocus
+              />
+            </label>
+
+            <div className="slotList">
+              {slots.map((slot, index) => (
+                <button
+                  key={index}
+                  className="slotButton"
+                  type="button"
+                  onClick={() => handleSave(index)}
+                >
+                  <span className="slotButtonTitle">Слот {index + 1}</span>
+
+                  {slot ? (
+                    <span className="slotButtonMeta">
+                      Будет перезаписан: {slot.title} ·{" "}
+                      {formatTime(slot.minutes)} ·{" "}
+                      {formatNumber(slot.fuelPerHour)} кг/ч
+                    </span>
+                  ) : (
+                    <span className="slotButtonMeta">Пустой</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
