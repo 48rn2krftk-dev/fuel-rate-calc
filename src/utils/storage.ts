@@ -18,6 +18,15 @@ export function getSettings(): AppSettings {
 
 export function saveSettings(settings: AppSettings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  window.dispatchEvent(new Event("hotIdle.settingsChanged"));
+}
+
+export function subscribeSettingsChange(callback: () => void) {
+  window.addEventListener("hotIdle.settingsChanged", callback);
+
+  return () => {
+    window.removeEventListener("hotIdle.settingsChanged", callback);
+  };
 }
 
 export function getSlots(): Array<SlotData | null> {

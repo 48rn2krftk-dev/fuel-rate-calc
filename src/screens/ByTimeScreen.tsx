@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculateByFuelDifference,
   calculateDeviation,
   parseFuel,
 } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
-import { getSettings } from "../utils/storage";
+import { getSettings, subscribeSettingsChange } from "../utils/storage";
 
 type ParsedDateTime =
   | {
@@ -241,7 +241,13 @@ export function ByTimeScreen() {
   const [fuelEnd, setFuelEnd] = useState("");
   const [nextDay, setNextDay] = useState(false);
 
-  const settings = getSettings();
+  const [settings, setSettings] = useState(() => getSettings());
+
+useEffect(() => {
+  return subscribeSettingsChange(() => {
+    setSettings(getSettings());
+  });
+}, []);
 
   const parsedStart = parseDateTime(startTime);
   const parsedEnd = parseDateTime(endTime);
@@ -442,8 +448,8 @@ export function ByTimeScreen() {
         </p>
 
         {deviation !== null && (
-          <p className={deviation <= 0 ? "deviation good" : "deviation bad"}>
-            {deviation <= 0 ? "↓" : "↑"} {formatNumber(Math.abs(deviation))} %
+          <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
+            {deviation < 0 ? "↓" : "↑"} {formatNumber(Math.abs(deviation))} %
             от нормы
           </p>
         )}

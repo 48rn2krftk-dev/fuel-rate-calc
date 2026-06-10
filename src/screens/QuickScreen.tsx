@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { calculateDeviation, calculateManual, parseFuel } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
-import { getSettings } from "../utils/storage";
+import { getSettings, subscribeSettingsChange } from "../utils/storage";
 
 function parseDurationToMinutes(value: string): number | null {
   const raw = value.trim().toLowerCase();
@@ -65,7 +65,13 @@ export function QuickScreen() {
   const [duration, setDuration] = useState("");
   const [fuelUsed, setFuelUsed] = useState("");
 
-  const settings = getSettings();
+  const [settings, setSettings] = useState(() => getSettings());
+
+useEffect(() => {
+  return subscribeSettingsChange(() => {
+    setSettings(getSettings());
+  });
+}, []);
 
   const calculation = useMemo(() => {
     const minutes = parseDurationToMinutes(duration);
@@ -152,8 +158,8 @@ export function QuickScreen() {
         </p>
 
         {deviation !== null && (
-          <p className={deviation <= 0 ? "deviation good" : "deviation bad"}>
-            {deviation <= 0 ? "↓" : "↑"} {formatNumber(Math.abs(deviation))} %
+          <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
+            {deviation < 0 ? "↓" : "↑"} {formatNumber(Math.abs(deviation))} %
             от нормы
           </p>
         )}
