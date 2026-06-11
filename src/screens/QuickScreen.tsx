@@ -158,12 +158,13 @@ useEffect(() => {
           {calculation ? `${formatNumber(calculation.fuelPerHour)} кг/ч` : "—"}
         </p>
 
-        {deviation !== null && (
-          <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
-            {deviation < 0 ? "↓" : "↑"} {formatNumber(Math.abs(deviation))} %
-            от нормы
-          </p>
-        )}
+        {deviation !== null && deviation !== 0 && (
+  <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
+    {deviation < 0 ? "↓" : "↑"}{" "}
+    {formatNumber(deviation > 0 ? 100 + deviation : 100 - Math.abs(deviation))} %
+    от нормы
+  </p>
+)}
 
         <SaveResultPanel result={calculation} defaultTitle="Быстрый расчёт" />
       </div>

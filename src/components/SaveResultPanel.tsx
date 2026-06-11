@@ -1,5 +1,5 @@
 import { Save, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CalculationResult, SlotData } from "../types";
 import { formatNumber, formatTime } from "../utils/format";
 import { getSlots, saveSlot, subscribeSlotsChange } from "../utils/storage";
@@ -28,7 +28,44 @@ export function SaveResultPanel({
     setTitle(defaultTitle);
   }, [defaultTitle]);
 
+  const filledSlotsCount = useMemo(
+    () => slots.filter((slot) => slot !== null).length,
+    [slots]
+  );
+
+  const visibleSlotIndexes = useMemo(() => {
+    const indexes = slots
+      .map((slot, index) => (slot ? index : null))
+      .filter((index): index is number => index !== null);
+
+    if (filledSlotsCount < 3) {
+      indexes.push(filledSlotsCount);
+    }
+
+    return indexes;
+  }, [slots, filledSlotsCount]);
+
+  function createSlotData(): SlotData | null {
+    if (!result) return null;
+
+    return {
+      ...result,
+      title: title.trim() || defaultTitle,
+      savedAt: new Date().toISOString(),
+    };
+  }
+
+  function showMessage(text: string) {
+    setMessage(text);
+
+    window.setTimeout(() => {
+      setMessage("");
+    }, 1800);
+  }
+
   function handleOpen() {
+    if (!result) return;
+
     setTitle(defaultTitle);
     setIsOpen(true);
   }
@@ -38,21 +75,20 @@ export function SaveResultPanel({
   }
 
   function handleSave(slotIndex: number) {
-    if (!result) return;
+    const slotData = createSlotData();
 
-    const slotData: SlotData = {
-      ...result,
-      title: title.trim() || defaultTitle,
-      savedAt: new Date().toISOString(),
-    };
+    if (!slotData) return;
+
+    const isOverwrite = slots[slotIndex] !== null;
 
     saveSlot(slotIndex, slotData);
-    setMessage(`Сохранено в слот ${slotIndex + 1}`);
     setIsOpen(false);
 
-    window.setTimeout(() => {
-      setMessage("");
-    }, 1800);
+    showMessage(
+      isOverwrite
+        ? `Слот ${slotIndex + 1} перезаписан`
+        : `Сохранено в слот ${slotIndex + 1}`
+    );
   }
 
   return (
@@ -81,7 +117,11 @@ export function SaveResultPanel({
             <div className="modalHeader">
               <div>
                 <h2>Сохранить результат</h2>
-                <p>Выбери слот для временного сохранения.</p>
+                <p>
+                  {filledSlotsCount === 0
+                    ? "Задай название и сохрани первый слот."
+                    : "Можно перезаписать существующий слот или сохранить в новый."}
+                </p>
               </div>
 
               <button
@@ -104,28 +144,47 @@ export function SaveResultPanel({
               />
             </label>
 
-            <div className="slotList">
-              {slots.map((slot, index) => (
-                <button
-                  key={index}
-                  className="slotButton"
-                  type="button"
-                  onClick={() => handleSave(index)}
-                >
-                  <span className="slotButtonTitle">Слот {index + 1}</span>
+            {filledSlotsCount === 0 ? (
+              <button
+                className="primaryButton fullWidthButton"
+                type="button"
+                onClick={() => handleSave(0)}
+              >
+                Сохранить в слот 1
+              </button>
+            ) : (
+              <div className="slotList">
+                {visibleSlotIndexes.map((index) => {
+                  const slot = slots[index];
 
-                  {slot ? (
-                    <span className="slotButtonMeta">
-                      Будет перезаписан: {slot.title} ·{" "}
-                      {formatTime(slot.minutes)} ·{" "}
-                      {formatNumber(slot.fuelPerHour)} кг/ч
-                    </span>
-                  ) : (
-                    <span className="slotButtonMeta">Пустой</span>
-                  )}
-                </button>
-              ))}
-            </div>
+                  return (
+                    <button
+                      key={index}
+                      className="slotButton"
+                      type="button"
+                      onClick={() => handleSave(index)}
+                    >
+                      <span className="slotButtonTitle">
+                        {slot
+                          ? `Слот ${index + 1} — перезаписать`
+                          : `Слот ${index + 1} — сохранить в новый`}
+                      </span>
+
+                      {slot ? (
+                        <span className="slotButtonMeta">
+                          Сейчас: {slot.title} · {formatTime(slot.minutes)} ·{" "}
+                          {formatNumber(slot.fuelPerHour)} кг/ч
+                        </span>
+                      ) : (
+                        <span className="slotButtonMeta">
+                          Новый свободный слот
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
