@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
+import type { HistoryEntry } from "../types";
 import {
   calculateByFuelDifference,
   parseFuel,
@@ -235,11 +236,21 @@ function formatInputValue(
   return formatOnlyTime(parsed.minutes);
 }
 
-export function ByTimeScreen() {
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [fuelStart, setFuelStart] = useState("");
-  const [fuelEnd, setFuelEnd] = useState("");
+type ByTimeScreenProps = {
+  initialEntry: HistoryEntry | null;
+};
+
+export function ByTimeScreen({ initialEntry }: ByTimeScreenProps) {
+  const initialSource =
+    initialEntry?.source.type === "byTime" ? initialEntry.source : null;
+  const [startTime, setStartTime] = useState(initialSource?.startTime ?? "");
+  const [endTime, setEndTime] = useState(initialSource?.endTime ?? "");
+  const [fuelStart, setFuelStart] = useState(
+    initialSource ? formatNumber(initialSource.fuelStart) : ""
+  );
+  const [fuelEnd, setFuelEnd] = useState(
+    initialSource ? formatNumber(initialSource.fuelEnd) : ""
+  );
   const [nextDay, setNextDay] = useState(false);
 
   const [settings, setSettings] = useState(() => getSettings());
@@ -452,7 +463,23 @@ useEffect(() => {
           />
         )}
 
-        <SaveResultPanel result={calculation} defaultTitle="Расчёт по времени" />
+        <SaveResultPanel
+          result={calculation}
+          defaultTitle="Расчёт по времени"
+          source={
+            calculation &&
+            fuelStartParsed !== null &&
+            fuelEndParsed !== null
+              ? {
+                  type: "byTime",
+                  startTime,
+                  endTime,
+                  fuelStart: fuelStartParsed,
+                  fuelEnd: fuelEndParsed,
+                }
+              : null
+          }
+        />
       </div>
     </section>
   );

@@ -4,11 +4,23 @@ import { ByTimeScreen } from "./screens/ByTimeScreen";
 import { QuickScreen } from "./screens/QuickScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { SummaryScreen } from "./screens/SummaryScreen";
+import type { HistoryEntry } from "./types";
 
 type Screen = "byTime" | "quick" | "summary" | "settings";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("byTime");
+  const [restoredEntry, setRestoredEntry] = useState<HistoryEntry | null>(null);
+
+  function navigate(screenName: Screen) {
+    setRestoredEntry(null);
+    setScreen(screenName);
+  }
+
+  function openHistoryEntry(entry: HistoryEntry) {
+    setRestoredEntry(entry);
+    setScreen(entry.source.type);
+  }
 
   return (
     <div className="app">
@@ -20,16 +32,39 @@ export default function App() {
       </header>
 
       <main className="appMain">
-        {screen === "byTime" && <ByTimeScreen />}
-        {screen === "quick" && <QuickScreen />}
-        {screen === "summary" && <SummaryScreen />}
-        {screen === "settings" && <SettingsScreen />}
+        {screen === "byTime" && (
+          <ByTimeScreen
+            key={restoredEntry?.id ?? "byTime-new"}
+            initialEntry={
+              restoredEntry?.source.type === "byTime" ? restoredEntry : null
+            }
+          />
+        )}
+        {screen === "quick" && (
+          <QuickScreen
+            key={restoredEntry?.id ?? "quick-new"}
+            initialEntry={
+              restoredEntry?.source.type === "quick" ? restoredEntry : null
+            }
+          />
+        )}
+        {screen === "summary" && (
+          <SummaryScreen
+            key={restoredEntry?.id ?? "summary-new"}
+            initialEntry={
+              restoredEntry?.source.type === "summary" ? restoredEntry : null
+            }
+          />
+        )}
+        {screen === "settings" && (
+          <SettingsScreen onOpenHistoryEntry={openHistoryEntry} />
+        )}
       </main>
 
       <nav className="bottomNav">
         <button
           className={screen === "byTime" ? "navButton active" : "navButton"}
-          onClick={() => setScreen("byTime")}
+          onClick={() => navigate("byTime")}
         >
           <Clock3 size={21} />
           <span>Время</span>
@@ -37,7 +72,7 @@ export default function App() {
 
         <button
           className={screen === "quick" ? "navButton active" : "navButton"}
-          onClick={() => setScreen("quick")}
+          onClick={() => navigate("quick")}
         >
           <Calculator size={21} />
           <span>Быстро</span>
@@ -45,7 +80,7 @@ export default function App() {
 
         <button
           className={screen === "summary" ? "navButton active" : "navButton"}
-          onClick={() => setScreen("summary")}
+          onClick={() => navigate("summary")}
         >
           <Layers3 size={21} />
           <span>Сумма</span>
@@ -53,7 +88,7 @@ export default function App() {
 
         <button
           className={screen === "settings" ? "navButton active" : "navButton"}
-          onClick={() => setScreen("settings")}
+          onClick={() => navigate("settings")}
         >
           <Settings size={21} />
           <span>Ещё</span>

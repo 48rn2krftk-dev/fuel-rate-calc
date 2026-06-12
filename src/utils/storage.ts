@@ -1,8 +1,10 @@
-import type { AppSettings, SlotData } from "../types";
+import type { AppSettings, HistoryEntry, SlotData } from "../types";
 
 const SETTINGS_KEY = "hotIdle.settings";
 const SLOTS_KEY = "hotIdle.slots";
+const HISTORY_KEY = "hotIdle.history";
 const MAX_SLOTS = 3;
+const MAX_HISTORY_ITEMS = 50;
 
 export function getSettings(): AppSettings {
   const raw = localStorage.getItem(SETTINGS_KEY);
@@ -86,5 +88,43 @@ export function subscribeSlotsChange(callback: () => void) {
 
   return () => {
     window.removeEventListener("hotIdle.slotsChanged", callback);
+  };
+}
+
+export function getHistory(): HistoryEntry[] {
+  const raw = localStorage.getItem(HISTORY_KEY);
+
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(0, MAX_HISTORY_ITEMS) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addHistoryEntry(entry: HistoryEntry) {
+  const history = [entry, ...getHistory()].slice(0, MAX_HISTORY_ITEMS);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  window.dispatchEvent(new Event("hotIdle.historyChanged"));
+}
+
+export function clearHistoryEntry(id: string) {
+  const history = getHistory().filter((entry) => entry.id !== id);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  window.dispatchEvent(new Event("hotIdle.historyChanged"));
+}
+
+export function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  window.dispatchEvent(new Event("hotIdle.historyChanged"));
+}
+
+export function subscribeHistoryChange(callback: () => void) {
+  window.addEventListener("hotIdle.historyChanged", callback);
+
+  return () => {
+    window.removeEventListener("hotIdle.historyChanged", callback);
   };
 }

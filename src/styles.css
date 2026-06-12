@@ -400,6 +400,92 @@ h2 {
   font-size: 14px;
 }
 
+.historyTitle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historyTitle .sectionTitle {
+  flex: 1;
+}
+
+.emptyHistory {
+  margin: 8px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.historyList {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.historyCard {
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.historyCard.interactive {
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.historyCard.interactive:hover,
+.historyCard.interactive:focus-visible {
+  border-color: #7aa7ff;
+  outline: none;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+.historyHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historyHeader p,
+.historySource,
+.historyNorm {
+  color: #667085;
+  font-size: 13px;
+}
+
+.historyHeader p {
+  margin: 4px 0 0;
+}
+
+.historySource {
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+
+.historyResult {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #e8f0ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.historyNorm {
+  margin: 10px 0 0;
+}
+
 .dangerButton {
   min-height: 38px;
   padding: 0 12px;
@@ -474,6 +560,31 @@ h2 {
   display: grid;
   gap: 12px;
   margin-top: 14px;
+}
+
+.summaryFuelStart {
+  margin-top: 14px;
+}
+
+.actualFuelEnd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: #eef2f7;
+  color: #344054;
+  font-size: 14px;
+}
+
+.actualFuelEnd span {
+  font-weight: 700;
+}
+
+.actualFuelEnd b {
+  flex: 0 0 auto;
 }
 
 .summaryRowCard {

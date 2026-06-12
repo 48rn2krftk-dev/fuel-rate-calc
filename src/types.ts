@@ -7,6 +7,38 @@ export type CalculationResult = {
 export type SlotData = CalculationResult & {
   title: string;
   savedAt: string;
+  source?: CalculationSource;
+};
+
+export type CalculationSource =
+  | {
+      type: "byTime";
+      startTime: string;
+      endTime: string;
+      fuelStart: number;
+      fuelEnd: number;
+    }
+  | {
+      type: "quick";
+      duration: string;
+      fuelUsed: number;
+    }
+  | {
+      type: "summary";
+      fuelStart: number | null;
+      items: Array<{
+        title: string;
+        minutes: number;
+        fuelUsed: number;
+      }>;
+    };
+
+export type HistoryEntry = CalculationResult & {
+  id: string;
+  title: string;
+  createdAt: string;
+  normFuelPerHour: number | null;
+  source: CalculationSource;
 };
 
 export type AppSettings = {

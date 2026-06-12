@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
+import type { HistoryEntry } from "../types";
 import { calculateManual, parseFuel } from "../utils/calculations";
 import {
   formatDurationInput,
@@ -9,9 +10,17 @@ import {
 import { formatNumber, formatTime } from "../utils/format";
 import { getSettings, subscribeSettingsChange } from "../utils/storage";
 
-export function QuickScreen() {
-  const [duration, setDuration] = useState("");
-  const [fuelUsed, setFuelUsed] = useState("");
+type QuickScreenProps = {
+  initialEntry: HistoryEntry | null;
+};
+
+export function QuickScreen({ initialEntry }: QuickScreenProps) {
+  const initialSource =
+    initialEntry?.source.type === "quick" ? initialEntry.source : null;
+  const [duration, setDuration] = useState(initialSource?.duration ?? "");
+  const [fuelUsed, setFuelUsed] = useState(
+    initialSource ? formatNumber(initialSource.fuelUsed) : ""
+  );
 
   const [settings, setSettings] = useState(() => getSettings());
 
@@ -108,7 +117,19 @@ useEffect(() => {
           />
         )}
 
-        <SaveResultPanel result={calculation} defaultTitle="Быстрый расчёт" />
+        <SaveResultPanel
+          result={calculation}
+          defaultTitle="Быстрый расчёт"
+          source={
+            calculation
+              ? {
+                  type: "quick",
+                  duration: formatDurationInput(calculation.minutes),
+                  fuelUsed: calculation.fuelUsed,
+                }
+              : null
+          }
+        />
       </div>
     </section>
   );

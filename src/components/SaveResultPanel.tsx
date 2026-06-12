@@ -1,17 +1,30 @@
 import { Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { CalculationResult, SlotData } from "../types";
+import type {
+  CalculationResult,
+  CalculationSource,
+  HistoryEntry,
+  SlotData,
+} from "../types";
 import { formatNumber, formatTime } from "../utils/format";
-import { getSlots, saveSlot, subscribeSlotsChange } from "../utils/storage";
+import {
+  addHistoryEntry,
+  getSettings,
+  getSlots,
+  saveSlot,
+  subscribeSlotsChange,
+} from "../utils/storage";
 
 type SaveResultPanelProps = {
   result: CalculationResult | null;
   defaultTitle: string;
+  source: CalculationSource | null;
 };
 
 export function SaveResultPanel({
   result,
   defaultTitle,
+  source,
 }: SaveResultPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [slots, setSlots] = useState<Array<SlotData | null>>(() => getSlots());
@@ -41,13 +54,31 @@ export function SaveResultPanel({
     return indexes;
   }, [slots, filledSlotsCount]);
 
-  function createSlotData(): SlotData | null {
-    if (!result) return null;
+  function createSavedData(): {
+    slot: SlotData;
+    history: HistoryEntry;
+  } | null {
+    if (!result || !source) return null;
+
+    const savedAt = new Date().toISOString();
+    const savedTitle = title.trim() || defaultTitle;
+    const slot: SlotData = {
+      ...result,
+      title: savedTitle,
+      savedAt,
+      source,
+    };
 
     return {
-      ...result,
-      title: title.trim() || defaultTitle,
-      savedAt: new Date().toISOString(),
+      slot,
+      history: {
+        ...result,
+        id: savedAt,
+        title: savedTitle,
+        createdAt: savedAt,
+        normFuelPerHour: getSettings().normFuelPerHour,
+        source,
+      },
     };
   }
 
@@ -71,13 +102,14 @@ export function SaveResultPanel({
   }
 
   function handleSave(slotIndex: number) {
-    const slotData = createSlotData();
+    const savedData = createSavedData();
 
-    if (!slotData) return;
+    if (!savedData) return;
 
     const isOverwrite = slots[slotIndex] !== null;
 
-    saveSlot(slotIndex, slotData);
+    saveSlot(slotIndex, savedData.slot);
+    addHistoryEntry(savedData.history);
     setIsOpen(false);
 
     showMessage(

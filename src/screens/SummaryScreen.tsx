@@ -1,7 +1,8 @@
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
-import type { CalculationResult, SlotData } from "../types";
+import { SaveResultPanel } from "../components/SaveResultPanel";
+import type { CalculationResult, HistoryEntry, SlotData } from "../types";
 import {
   calculateManual,
   parseFuel,
@@ -40,7 +41,17 @@ function createRow(): SummaryRow {
   };
 }
 
-function createInitialRows(): SummaryRow[] {
+function createInitialRows(entry?: HistoryEntry | null): SummaryRow[] {
+  if (entry?.source.type === "summary") {
+    return entry.source.items.map((item) => ({
+      id: nextRowId++,
+      mode: "manual",
+      duration: formatDurationInput(item.minutes),
+      fuelUsed: formatNumber(item.fuelUsed),
+      slotSavedAt: "",
+    }));
+  }
+
   return [createRow(), createRow()];
 }
 
@@ -62,8 +73,21 @@ function getRowResult(
   return calculateManual(minutes, fuelUsed);
 }
 
-export function SummaryScreen() {
-  const [rows, setRows] = useState<SummaryRow[]>(createInitialRows);
+type SummaryScreenProps = {
+  initialEntry: HistoryEntry | null;
+};
+
+export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
+  const initialSource =
+    initialEntry?.source.type === "summary" ? initialEntry.source : null;
+  const [rows, setRows] = useState<SummaryRow[]>(() =>
+    createInitialRows(initialEntry)
+  );
+  const [fuelStart, setFuelStart] = useState(
+    initialSource?.fuelStart === null || initialSource?.fuelStart === undefined
+      ? ""
+      : formatNumber(initialSource.fuelStart)
+  );
   const [slots, setSlots] = useState(() => getSlots());
   const [settings, setSettings] = useState(() => getSettings());
 
@@ -101,18 +125,71 @@ export function SummaryScreen() {
       calculation.fuelUsed / (calculation.minutes / 60);
   }
 
+  const parsedFuelStart =
+    fuelStart.trim() === "" ? null : parseFuel(fuelStart);
+  const fuelStartError = fuelStart.trim() !== "" && parsedFuelStart === null;
+  const fuelChainError =
+    calculation !== null &&
+    parsedFuelStart !== null &&
+    calculation.fuelUsed > parsedFuelStart;
+  const actualFuelEnd =
+    calculation !== null && parsedFuelStart !== null && !fuelChainError
+      ? parsedFuelStart - calculation.fuelUsed
+      : null;
+
+  const historySource = calculation
+    ? {
+        type: "summary" as const,
+        fuelStart: parsedFuelStart,
+        items: rowResults.map((result, index) => {
+          const row = rows[index];
+          const slot =
+            row.mode === "slot"
+              ? slots.find((item) => item?.savedAt === row.slotSavedAt)
+              : null;
+
+          return {
+            title: slot?.title || `Прогрев ${index + 1}`,
+            minutes: result?.minutes ?? 0,
+            fuelUsed: result?.fuelUsed ?? 0,
+          };
+        }),
+      }
+    : null;
+
   function updateRow(id: number, patch: Partial<SummaryRow>) {
     setRows((currentRows) =>
       currentRows.map((row) => (row.id === id ? { ...row, ...patch } : row))
     );
   }
 
+  function applyFirstRowFuelStart(rowId: number, savedAt: string) {
+    if (rows[0]?.id !== rowId) return;
+
+    const slot = slots.find((item) => item?.savedAt === savedAt);
+
+    if (slot?.source?.type === "byTime") {
+      setFuelStart(formatNumber(slot.source.fuelStart));
+    }
+  }
+
   function setMode(row: SummaryRow, mode: SummaryMode) {
+    const slotSavedAt =
+      mode === "slot" ? row.slotSavedAt || filledSlots[0]?.savedAt || "" : "";
+
     updateRow(row.id, {
       mode,
-      slotSavedAt:
-        mode === "slot" ? row.slotSavedAt || filledSlots[0]?.savedAt || "" : "",
+      slotSavedAt,
     });
+
+    if (mode === "slot") {
+      applyFirstRowFuelStart(row.id, slotSavedAt);
+    }
+  }
+
+  function selectSlot(row: SummaryRow, savedAt: string) {
+    updateRow(row.id, { slotSavedAt: savedAt });
+    applyFirstRowFuelStart(row.id, savedAt);
   }
 
   function handleDurationBlur(row: SummaryRow) {
@@ -129,6 +206,7 @@ export function SummaryScreen() {
 
   function clearRows() {
     setRows(createInitialRows());
+    setFuelStart("");
   }
 
   return (
@@ -141,6 +219,28 @@ export function SummaryScreen() {
             вручную.
           </p>
         </div>
+
+        <label className="field summaryFuelStart">
+          <span>Топливо в начале цепочки, кг (необязательно)</span>
+          <input
+            value={fuelStart}
+            onChange={(event) => setFuelStart(event.target.value)}
+            placeholder="411,000"
+            inputMode="decimal"
+          />
+        </label>
+
+        {fuelStartError && (
+          <div className="errorBox">
+            Введи начальное топливо от 0 до 9999,999 кг.
+          </div>
+        )}
+
+        {fuelChainError && (
+          <div className="errorBox">
+            Общий расход не может превышать топливо в начале цепочки.
+          </div>
+        )}
 
         <div className="summaryRows">
           {rows.map((row, index) => {
@@ -204,9 +304,7 @@ export function SummaryScreen() {
                       className="selectInput"
                       value={row.slotSavedAt}
                       onChange={(event) =>
-                        updateRow(row.id, {
-                          slotSavedAt: event.target.value,
-                        })
+                        selectSlot(row, event.target.value)
                       }
                     >
                       {filledSlots.map((slot, slotIndex) => (
@@ -304,12 +402,26 @@ export function SummaryScreen() {
             : "—"}
         </p>
 
+        {actualFuelEnd !== null && (
+          <div className="actualFuelEnd">
+            <span>Остаток по фактическому расходу</span>
+            <b>{formatNumber(actualFuelEnd)} кг</b>
+          </div>
+        )}
+
         {calculation && (
           <NormComparison
             result={calculation}
             normFuelPerHour={settings.normFuelPerHour}
+            fuelAtStart={fuelChainError ? null : parsedFuelStart}
           />
         )}
+
+        <SaveResultPanel
+          result={fuelStartError || fuelChainError ? null : calculation}
+          defaultTitle="Суммирование"
+          source={fuelStartError || fuelChainError ? null : historySource}
+        />
       </div>
     </section>
   );
