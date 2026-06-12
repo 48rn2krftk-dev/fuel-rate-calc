@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { NormComparison } from "../components/NormComparison";
+import { SaveResultPanel } from "../components/SaveResultPanel";
 import {
   calculateByFuelDifference,
-  calculateDeviation,
   parseFuel,
 } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
 import { getSettings, subscribeSettingsChange } from "../utils/storage";
-import { SaveResultPanel } from "../components/SaveResultPanel";
 
 type ParsedDateTime =
   | {
@@ -253,7 +253,7 @@ useEffect(() => {
   const parsedStart = parseDateTime(startTime);
   const parsedEnd = parseDateTime(endTime);
 
-  const calculation = useMemo(() => {
+  const calculation = (() => {
     const start = parseDateTime(startTime);
     const end = parseDateTime(endTime);
     const startFuel = parseFuel(fuelStart);
@@ -275,7 +275,7 @@ useEffect(() => {
     }
 
     return calculateByFuelDifference(minutes, startFuel, endFuel);
-  }, [startTime, endTime, fuelStart, fuelEnd, nextDay]);
+  })();
 
   const needNextDayWarning = (() => {
     if (!parsedStart || !parsedEnd || nextDay) return false;
@@ -309,10 +309,6 @@ useEffect(() => {
     parsedEnd !== null &&
     parsedStart.type === "time" &&
     parsedEnd.type === "datetime";
-
-  const deviation = calculation
-    ? calculateDeviation(calculation.fuelPerHour, settings.normFuelPerHour)
-    : null;
 
   function handleStartBlur() {
     const parsed = parseDateTime(startTime);
@@ -448,13 +444,13 @@ useEffect(() => {
           {calculation ? `${formatNumber(calculation.fuelPerHour)} кг/ч` : "—"}
         </p>
 
-        {deviation !== null && deviation !== 0 && (
-  <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
-    {deviation < 0 ? "↓" : "↑"}{" "}
-    {formatNumber(deviation > 0 ? 100 + deviation : 100 - Math.abs(deviation))} %
-    от нормы
-  </p>
-)}
+        {calculation && (
+          <NormComparison
+            result={calculation}
+            normFuelPerHour={settings.normFuelPerHour}
+            fuelAtStart={fuelStartParsed}
+          />
+        )}
 
         <SaveResultPanel result={calculation} defaultTitle="Расчёт по времени" />
       </div>

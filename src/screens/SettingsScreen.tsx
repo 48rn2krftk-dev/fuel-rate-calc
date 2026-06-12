@@ -12,17 +12,12 @@ import {
 
 export function SettingsScreen() {
   const [settings, setSettings] = useState<AppSettings>(() => getSettings());
-  const [normInput, setNormInput] = useState("");
+  const [normInput, setNormInput] = useState(() => {
+    const norm = getSettings().normFuelPerHour;
+    return norm === null ? "" : formatNumber(norm);
+  });
   const [savedMessage, setSavedMessage] = useState("");
   const [slots, setSlots] = useState(() => getSlots());
-
-  useEffect(() => {
-    setNormInput(
-      settings.normFuelPerHour === null
-        ? ""
-        : formatNumber(settings.normFuelPerHour)
-    );
-  }, [settings.normFuelPerHour]);
 
   useEffect(() => {
   return subscribeSlotsChange(() => {

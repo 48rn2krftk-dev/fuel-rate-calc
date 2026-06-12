@@ -191,6 +191,55 @@ h2 {
   color: #b42318;
 }
 
+.deviation.neutral {
+  background: #eef2f7;
+  color: #475467;
+}
+
+.normComparison {
+  display: grid;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.normComparison .deviation {
+  width: fit-content;
+  margin: 0;
+}
+
+.normBalance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.normBalance span {
+  font-weight: 700;
+}
+
+.normBalance b {
+  flex: 0 0 auto;
+}
+
+.normBalance.good {
+  background: #e8fff3;
+  color: #027a48;
+}
+
+.normBalance.bad {
+  background: #ffecec;
+  color: #b42318;
+}
+
+.normBalance.neutral {
+  background: #eef4ff;
+  color: #1d4ed8;
+}
+
 .bottomNav {
   position: fixed;
   right: 14px;
@@ -419,4 +468,108 @@ h2 {
 .fullWidthButton {
   width: 100%;
   margin-top: 14px;
+}
+
+.summaryRows {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.summaryRowCard {
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 20px;
+  background: #f8fbff;
+}
+
+.summaryRowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.iconDangerButton {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: #ffecec;
+  color: #b42318;
+}
+
+.segmentedControl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 5px;
+  border-radius: 16px;
+  background: #e9eef6;
+}
+
+.segmentButton {
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #667085;
+  font-weight: 800;
+}
+
+.segmentButton.active {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 6px 14px rgba(49, 79, 124, 0.08);
+}
+
+.segmentButton:disabled {
+  opacity: 0.5;
+}
+
+.selectInput {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid #d7deea;
+  border-radius: 16px;
+  outline: none;
+  background: #ffffff;
+  color: #152033;
+  font: inherit;
+}
+
+.selectInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.miniResult {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #e8f0ff;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.summaryActions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.summaryActions .primaryButton,
+.summaryActions .secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

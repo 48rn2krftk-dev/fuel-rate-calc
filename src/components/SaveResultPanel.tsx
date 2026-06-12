@@ -24,10 +24,6 @@ export function SaveResultPanel({
     });
   }, []);
 
-  useEffect(() => {
-    setTitle(defaultTitle);
-  }, [defaultTitle]);
-
   const filledSlotsCount = useMemo(
     () => slots.filter((slot) => slot !== null).length,
     [slots]
