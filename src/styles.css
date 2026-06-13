@@ -81,6 +81,11 @@ h1 {
   color: #475467;
 }
 
+.connectionStatus.checking {
+  background: #e8f0ff;
+  color: #1d4ed8;
+}
+
 .connectionDot {
   width: 7px;
   height: 7px;

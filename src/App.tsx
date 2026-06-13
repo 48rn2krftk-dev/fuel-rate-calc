@@ -7,11 +7,14 @@ import { SummaryScreen } from "./screens/SummaryScreen";
 import type { HistoryEntry } from "./types";
 
 type Screen = "byTime" | "quick" | "summary" | "settings";
+type ConnectionStatus = "checking" | "online" | "offline";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("byTime");
   const [restoredEntry, setRestoredEntry] = useState<HistoryEntry | null>(null);
-  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
+    () => (navigator.onLine ? "checking" : "offline")
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -19,7 +22,7 @@ export default function App() {
 
     async function checkConnection() {
       if (!navigator.onLine) {
-        setIsOnline(false);
+        setConnectionStatus("offline");
         return;
       }
 
@@ -39,11 +42,11 @@ export default function App() {
         );
 
         if (isMounted && activeController === controller) {
-          setIsOnline(response.ok);
+          setConnectionStatus(response.ok ? "online" : "offline");
         }
       } catch {
         if (isMounted && activeController === controller) {
-          setIsOnline(false);
+          setConnectionStatus("offline");
         }
       } finally {
         window.clearTimeout(timeoutId);
@@ -56,7 +59,7 @@ export default function App() {
 
     function handleOffline() {
       activeController?.abort();
-      setIsOnline(false);
+      setConnectionStatus("offline");
     }
 
     function handleVisibilityChange() {
@@ -106,12 +109,16 @@ export default function App() {
         </div>
 
         <div
-          className={isOnline ? "connectionStatus online" : "connectionStatus offline"}
+          className={`connectionStatus ${connectionStatus}`}
           role="status"
           aria-live="polite"
         >
           <span className="connectionDot" />
-          {isOnline ? "Онлайн" : "Офлайн"}
+          {connectionStatus === "checking"
+            ? "Проверка"
+            : connectionStatus === "online"
+              ? "Онлайн"
+              : "Офлайн"}
         </div>
       </header>
 
@@ -132,7 +139,7 @@ export default function App() {
             }
           />
         )}
-         {screen === "summary" && (
+        {screen === "summary" && (
           <SummaryScreen
             key={restoredEntry?.id ?? "summary-new"}
             initialEntry={

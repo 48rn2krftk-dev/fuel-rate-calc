@@ -365,7 +365,6 @@ export function SettingsScreen({
           Установка на iPhone: открой приложение в Safari, нажми «Поделиться» и
           выбери «На экран Домой».
         </p>
-
       </div>
     </section>
   );
