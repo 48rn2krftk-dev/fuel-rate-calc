@@ -1,3 +1,4 @@
+import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
@@ -172,6 +173,35 @@ function parseDateTime(value: string): ParsedDateTime | null {
     return null;
   }
 
+  const digitsOnlyDateTimeMatch = raw.match(
+    /^(\d{2})(\d{2})(\d{2}|\d{4})(\d{2})(\d{2})$/
+  );
+
+  if (digitsOnlyDateTimeMatch) {
+    const day = Number(digitsOnlyDateTimeMatch[1]);
+    const month = Number(digitsOnlyDateTimeMatch[2]);
+    const year = normalizeYear(digitsOnlyDateTimeMatch[3]);
+    const h = Number(digitsOnlyDateTimeMatch[4]);
+    const m = Number(digitsOnlyDateTimeMatch[5]);
+
+    const date = new Date(year, month - 1, day, h, m);
+
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day &&
+      h >= 0 &&
+      h <= 23 &&
+      m >= 0 &&
+      m <= 59
+    ) {
+      return {
+        type: "datetime",
+        date,
+      };
+    }
+  }
+
   return null;
 }
 
@@ -209,7 +239,7 @@ function getHeatingMinutes(
   if (start.type === "time" && end.type === "time") {
     let minutes = end.minutes - start.minutes;
 
-    if (minutes < 0 && nextDay) {
+    if (minutes <= 0 && nextDay) {
       minutes += 24 * 60;
     }
 
@@ -292,7 +322,7 @@ useEffect(() => {
     if (!parsedStart || !parsedEnd || nextDay) return false;
 
     if (parsedStart.type === "time" && parsedEnd.type === "time") {
-      return parsedEnd.minutes < parsedStart.minutes;
+      return parsedEnd.minutes <= parsedStart.minutes;
     }
 
     if (parsedStart.type === "datetime" && parsedEnd.type === "time") {
@@ -364,6 +394,14 @@ useEffect(() => {
     }
   }
 
+  function clearAll() {
+    setStartTime("");
+    setEndTime("");
+    setFuelStart("");
+    setFuelEnd("");
+    setNextDay(false);
+  }
+
   return (
     <section className="screen">
       <div className="card">
@@ -382,7 +420,8 @@ useEffect(() => {
                 setStartTime(e.target.value);
                 setNextDay(false);
               }}
-              placeholder="07:35 или 010126 0735"
+              placeholder="0735 или 0101260735"
+              inputMode="numeric"
             />
           </label>
 
@@ -395,7 +434,8 @@ useEffect(() => {
                 setEndTime(e.target.value);
                 setNextDay(false);
               }}
-              placeholder="09:10 или 020126 0910"
+              placeholder="0910 или 0201260910"
+              inputMode="numeric"
             />
           </label>
 
@@ -419,6 +459,15 @@ useEffect(() => {
             />
           </label>
         </div>
+
+        <button
+          className="secondaryButton clearAllButton"
+          type="button"
+          onClick={clearAll}
+        >
+          <RotateCcw size={18} />
+          Очистить всё
+        </button>
 
         <button className="secondaryButton ocrButton" type="button" disabled>
           <span>📷 Считать из ведомости</span>

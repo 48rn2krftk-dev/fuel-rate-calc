@@ -132,9 +132,11 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
     calculation !== null &&
     parsedFuelStart !== null &&
     calculation.fuelUsed > parsedFuelStart;
+  const visibleCalculation =
+    fuelStartError || fuelChainError ? null : calculation;
   const actualFuelEnd =
-    calculation !== null && parsedFuelStart !== null && !fuelChainError
-      ? parsedFuelStart - calculation.fuelUsed
+    visibleCalculation !== null && parsedFuelStart !== null
+      ? parsedFuelStart - visibleCalculation.fuelUsed
       : null;
 
   const historySource = calculation
@@ -324,8 +326,8 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                         onChange={(event) =>
                           updateRow(row.id, { duration: event.target.value })
                         }
-                        placeholder="01:35 или 0135"
-                        inputMode="text"
+                        placeholder="0135"
+                        inputMode="numeric"
                       />
                     </label>
 
@@ -382,23 +384,26 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
             onClick={clearRows}
           >
             <RotateCcw size={18} />
-            Очистить
+            Очистить всё
           </button>
         </div>
       </div>
 
       <div className="resultCard">
         <p>
-          Общее время: {calculation ? formatTime(calculation.minutes) : "—"}
+          Общее время:{" "}
+          {visibleCalculation ? formatTime(visibleCalculation.minutes) : "—"}
         </p>
         <p>
           Общий расход:{" "}
-          {calculation ? `${formatNumber(calculation.fuelUsed)} кг` : "—"}
+          {visibleCalculation
+            ? `${formatNumber(visibleCalculation.fuelUsed)} кг`
+            : "—"}
         </p>
         <p>
           Средний расход в час:{" "}
-          {calculation
-            ? `${formatNumber(calculation.fuelPerHour)} кг/ч`
+          {visibleCalculation
+            ? `${formatNumber(visibleCalculation.fuelPerHour)} кг/ч`
             : "—"}
         </p>
 
@@ -409,18 +414,18 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
           </div>
         )}
 
-        {calculation && (
+        {visibleCalculation && (
           <NormComparison
-            result={calculation}
+            result={visibleCalculation}
             normFuelPerHour={settings.normFuelPerHour}
-            fuelAtStart={fuelChainError ? null : parsedFuelStart}
+            fuelAtStart={parsedFuelStart}
           />
         )}
 
         <SaveResultPanel
-          result={fuelStartError || fuelChainError ? null : calculation}
+          result={visibleCalculation}
           defaultTitle="Суммирование"
-          source={fuelStartError || fuelChainError ? null : historySource}
+          source={visibleCalculation ? historySource : null}
         />
       </div>
     </section>

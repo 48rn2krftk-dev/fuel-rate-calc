@@ -1,3 +1,4 @@
+import { RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
@@ -55,6 +56,11 @@ useEffect(() => {
     }
   }
 
+  function clearAll() {
+    setDuration("");
+    setFuelUsed("");
+  }
+
   return (
     <section className="screen">
       <div className="card">
@@ -70,8 +76,8 @@ useEffect(() => {
               value={duration}
               onBlur={handleDurationBlur}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder="01:35 или 0135"
-              inputMode="text"
+              placeholder="0135"
+              inputMode="numeric"
             />
           </label>
 
@@ -85,6 +91,15 @@ useEffect(() => {
             />
           </label>
         </div>
+
+        <button
+          className="secondaryButton clearAllButton"
+          type="button"
+          onClick={clearAll}
+        >
+          <RotateCcw size={18} />
+          Очистить всё
+        </button>
 
         {durationError && (
           <div className="errorBox">
