@@ -14,16 +14,76 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
-    function updateConnectionStatus() {
-      setIsOnline(navigator.onLine);
+    let isMounted = true;
+    let activeController: AbortController | null = null;
+
+    async function checkConnection() {
+      if (!navigator.onLine) {
+        setIsOnline(false);
+        return;
+      }
+
+      activeController?.abort();
+      const controller = new AbortController();
+      activeController = controller;
+      const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.BASE_URL}manifest.webmanifest?online=${Date.now()}`,
+          {
+            method: "HEAD",
+            cache: "no-store",
+            signal: controller.signal,
+          }
+        );
+
+        if (isMounted && activeController === controller) {
+          setIsOnline(response.ok);
+        }
+      } catch {
+        if (isMounted && activeController === controller) {
+          setIsOnline(false);
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+
+        if (activeController === controller) {
+          activeController = null;
+        }
+      }
     }
 
-    window.addEventListener("online", updateConnectionStatus);
-    window.addEventListener("offline", updateConnectionStatus);
+    function handleOffline() {
+      activeController?.abort();
+      setIsOnline(false);
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void checkConnection();
+      }
+    }
+
+    void checkConnection();
+
+    const intervalId = window.setInterval(() => {
+      void checkConnection();
+    }, 15000);
+
+    window.addEventListener("online", checkConnection);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("focus", checkConnection);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("online", updateConnectionStatus);
-      window.removeEventListener("offline", updateConnectionStatus);
+      isMounted = false;
+      activeController?.abort();
+      window.clearInterval(intervalId);
+      window.removeEventListener("online", checkConnection);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("focus", checkConnection);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
@@ -72,7 +132,7 @@ export default function App() {
             }
           />
         )}
-        {screen === "summary" && (
+         {screen === "summary" && (
           <SummaryScreen
             key={restoredEntry?.id ?? "summary-new"}
             initialEntry={

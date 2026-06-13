@@ -312,7 +312,7 @@ export function SettingsScreen({
       <div className="card">
         <div className="sectionTitle">
           <h2>О приложении</h2>
-          <p>Горячий простой · версия 1.0.2</p>
+          <p>Горячий простой · версия 1.0.3</p>
         </div>
 
         <a
@@ -365,6 +365,7 @@ export function SettingsScreen({
           Установка на iPhone: открой приложение в Safari, нажми «Поделиться» и
           выбери «На экран Домой».
         </p>
+
       </div>
     </section>
   );
