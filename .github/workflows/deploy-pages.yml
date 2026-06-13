@@ -1,6 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
+  push:
+    branches: ["main"]
+    paths: [".github/release-version"]
   workflow_dispatch:
     inputs:
       version:
@@ -19,7 +22,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy ${{ inputs.version }}
+    name: Deploy release
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
