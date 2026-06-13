@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { ExternalLink, GitFork, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { AppSettings, HistoryEntry } from "../types";
 import { parseFuel } from "../utils/calculations";
@@ -311,27 +311,59 @@ export function SettingsScreen({
 
       <div className="card">
         <div className="sectionTitle">
-          <h2>Формула расчёта</h2>
-          <p>Как приложение считает горячий простой.</p>
+          <h2>О приложении</h2>
+          <p>Горячий простой · версия 1.0.0</p>
         </div>
 
-        <div className="formulaBox">
-          <p>
-            <b>Расход в час</b>
-          </p>
-          <p>Израсходованное топливо ÷ Время прогрева</p>
+        <a
+          className="githubLink"
+          href="https://github.com/48rn2krftk-dev/fuel-rate-calc"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <GitFork size={21} />
+          <span>
+            <b>GitHub разработчика</b>
+            <small>48rn2krftk-dev</small>
+          </span>
+          <ExternalLink size={18} />
+        </a>
+
+        <div className="feedbackLinks">
+          <a
+            className="feedbackLink"
+            href="https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=bug_report.yml"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>
+              <b>Сообщить об ошибке</b>
+              <small>Что произошло и как это повторить</small>
+            </span>
+            <ExternalLink size={18} />
+          </a>
+
+          <a
+            className="feedbackLink"
+            href="https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=feature_request.yml"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>
+              <b>Предложить улучшение</b>
+              <small>Идея новой функции или изменения</small>
+            </span>
+            <ExternalLink size={18} />
+          </a>
         </div>
 
-        <div className="formulaBox">
-          <p>
-            <b>Отклонение от нормы</b>
-          </p>
-          <p>(Факт − Норма) ÷ Норма × 100%</p>
-        </div>
+        <p className="feedbackHint">
+          Для отправки потребуется аккаунт GitHub.
+        </p>
 
-        <p className="hint">
-          Если фактический расход ниже нормы — приложение показывает зелёную
-          стрелку вниз. Если выше нормы — красную стрелку вверх.
+        <p className="installHint">
+          Установка на iPhone: открой приложение в Safari, нажми «Поделиться» и
+          выбери «На экран Домой».
         </p>
       </div>
     </section>

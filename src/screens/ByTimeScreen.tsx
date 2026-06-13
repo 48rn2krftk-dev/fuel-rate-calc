@@ -420,8 +420,9 @@ useEffect(() => {
           </label>
         </div>
 
-        <button className="secondaryButton" type="button">
-          📷 Считать из ведомости
+        <button className="secondaryButton ocrButton" type="button" disabled>
+          <span>📷 Считать из ведомости</span>
+          <span className="soonBadge">Скоро</span>
         </button>
 
         {needNextDayWarning && (
