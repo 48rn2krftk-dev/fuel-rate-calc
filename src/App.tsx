@@ -1,5 +1,5 @@
 import { Calculator, Clock3, Layers3, Settings } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ByTimeScreen } from "./screens/ByTimeScreen";
 import { QuickScreen } from "./screens/QuickScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -11,6 +11,21 @@ type Screen = "byTime" | "quick" | "summary" | "settings";
 export default function App() {
   const [screen, setScreen] = useState<Screen>("byTime");
   const [restoredEntry, setRestoredEntry] = useState<HistoryEntry | null>(null);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    function updateConnectionStatus() {
+      setIsOnline(navigator.onLine);
+    }
+
+    window.addEventListener("online", updateConnectionStatus);
+    window.addEventListener("offline", updateConnectionStatus);
+
+    return () => {
+      window.removeEventListener("online", updateConnectionStatus);
+      window.removeEventListener("offline", updateConnectionStatus);
+    };
+  }, []);
 
   function navigate(screenName: Screen) {
     setRestoredEntry(null);
@@ -28,6 +43,15 @@ export default function App() {
         <div>
           <p className="appEyebrow">PWA калькулятор</p>
           <h1>Горячий простой</h1>
+        </div>
+
+        <div
+          className={isOnline ? "connectionStatus online" : "connectionStatus offline"}
+          role="status"
+          aria-live="polite"
+        >
+          <span className="connectionDot" />
+          {isOnline ? "Онлайн" : "Офлайн"}
         </div>
       </header>
 

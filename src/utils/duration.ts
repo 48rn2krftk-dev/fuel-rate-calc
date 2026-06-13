@@ -3,7 +3,7 @@ export function parseDurationToMinutes(value: string): number | null {
 
   if (!raw) return null;
 
-  const colonMatch = raw.match(/^(\d{1,3})[:.](\d{1,2})$/);
+  const colonMatch = raw.match(/^(\d{1,6})[:.](\d{1,2})$/);
   if (colonMatch) {
     const hours = Number(colonMatch[1]);
     const minutes = Number(colonMatch[2]);
@@ -16,7 +16,7 @@ export function parseDurationToMinutes(value: string): number | null {
     return null;
   }
 
-  const compactTimeMatch = raw.match(/^(\d{2})(\d{2})$/);
+  const compactTimeMatch = raw.match(/^(\d{1,6})(\d{2})$/);
   if (compactTimeMatch) {
     const hours = Number(compactTimeMatch[1]);
     const minutes = Number(compactTimeMatch[2]);
@@ -30,7 +30,7 @@ export function parseDurationToMinutes(value: string): number | null {
   }
 
   const textMatch = raw.match(
-    /^(\d{1,3})\s*ч(?:ас(?:а|ов)?)?\s*(\d{1,2})?\s*м?$/
+    /^(\d{1,6})\s*ч(?:ас(?:а|ов)?)?\s*(\d{1,2})?\s*м?$/
   );
   if (textMatch) {
     const hours = Number(textMatch[1]);

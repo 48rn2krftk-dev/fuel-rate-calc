@@ -76,7 +76,7 @@ useEffect(() => {
               value={duration}
               onBlur={handleDurationBlur}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder="0135"
+              placeholder="2214 или 163559"
               inputMode="numeric"
             />
           </label>
@@ -103,7 +103,7 @@ useEffect(() => {
 
         {durationError && (
           <div className="errorBox">
-            Введи время в формате 01:35, 0135 или 1ч35.
+            Введи время в формате 22:14, 2214 или 163559.
           </div>
         )}
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "hot-idle-v2";
+const CACHE_NAME = "hot-idle-v3";
 const APP_SHELL = new URL("./", self.registration.scope).href;
 const STATIC_FILES = [
   "manifest.webmanifest",
@@ -56,16 +56,9 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(APP_SHELL, copy));
-          }
-
-          return response;
-        })
-        .catch(() => caches.match(APP_SHELL))
+      caches
+        .match(APP_SHELL)
+        .then((cached) => cached || fetch(request))
     );
     return;
   }

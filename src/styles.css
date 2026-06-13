@@ -34,6 +34,10 @@ input {
 }
 
 .appHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 4px 18px;
 }
 
@@ -53,6 +57,35 @@ h1 {
   margin-bottom: 0;
   font-size: 30px;
   letter-spacing: -0.04em;
+}
+
+.connectionStatus {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.connectionStatus.online {
+  background: #dcfce7;
+  color: #18713b;
+}
+
+.connectionStatus.offline {
+  background: #e4e7ec;
+  color: #475467;
+}
+
+.connectionDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 h2 {

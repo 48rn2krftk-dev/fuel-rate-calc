@@ -326,7 +326,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                         onChange={(event) =>
                           updateRow(row.id, { duration: event.target.value })
                         }
-                        placeholder="0135"
+                        placeholder="2214 или 163559"
                         inputMode="numeric"
                       />
                     </label>
@@ -345,7 +345,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
 
                     {durationError && (
                       <div className="errorBox">
-                        Введи время в формате 01:35, 0135 или 1ч35.
+                        Введи время в формате 22:14, 2214 или 163559.
                       </div>
                     )}
 
