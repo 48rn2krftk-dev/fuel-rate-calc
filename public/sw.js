@@ -1,4 +1,4 @@
-const CACHE_NAME = "hot-idle-v4";
+const CACHE_NAME = "hot-idle-v5";
 const APP_SHELL = new URL("./", self.registration.scope).href;
 const STATIC_FILES = [
   "manifest.webmanifest",

@@ -12,16 +12,29 @@ export function getSettings(): AppSettings {
   if (!raw) {
     return {
       normFuelPerHour: null,
-      theme: "light",
+      theme: "system",
     };
   }
 
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as Partial<AppSettings>;
+
+    return {
+      normFuelPerHour:
+        typeof parsed.normFuelPerHour === "number"
+          ? parsed.normFuelPerHour
+          : null,
+      theme:
+        parsed.theme === "light" ||
+        parsed.theme === "dark" ||
+        parsed.theme === "system"
+          ? parsed.theme
+          : "system",
+    };
   } catch {
     return {
       normFuelPerHour: null,
-      theme: "light",
+      theme: "system",
     };
   }
 }

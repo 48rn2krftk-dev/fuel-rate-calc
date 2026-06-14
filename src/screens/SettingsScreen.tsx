@@ -1,4 +1,15 @@
-import { ExternalLink, GitFork, Trash2 } from "lucide-react";
+import {
+  ExternalLink,
+  Gift,
+  GitFork,
+  Mail,
+  MessageCircle,
+  Monitor,
+  Moon,
+  Send,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { links, uiText } from "../content";
 import type { AppSettings, HistoryEntry } from "../types";
@@ -146,6 +157,16 @@ export function SettingsScreen({
     }, 1800);
   }
 
+  function handleThemeChange(theme: AppSettings["theme"]) {
+    const nextSettings: AppSettings = {
+      ...settings,
+      theme,
+    };
+
+    setSettings(nextSettings);
+    saveSettings(nextSettings);
+  }
+
   return (
     <section className="screen">
       <div className="card">
@@ -190,6 +211,59 @@ export function SettingsScreen({
         </div>
 
         {savedMessage && <div className="successBox">{savedMessage}</div>}
+      </div>
+
+      <div className="card">
+        <div className="sectionTitle">
+          <h2>{uiText.settings.appearanceTitle}</h2>
+          <p>{uiText.settings.appearanceDescription}</p>
+        </div>
+
+        <div
+          className="themeSelector"
+          role="group"
+          aria-label={uiText.settings.themeSelectorLabel}
+        >
+          <button
+            className={
+              settings.theme === "system"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.theme === "system"}
+            onClick={() => handleThemeChange("system")}
+          >
+            <Monitor size={18} />
+            {uiText.settings.theme.system}
+          </button>
+          <button
+            className={
+              settings.theme === "light"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.theme === "light"}
+            onClick={() => handleThemeChange("light")}
+          >
+            <Sun size={18} />
+            {uiText.settings.theme.light}
+          </button>
+          <button
+            className={
+              settings.theme === "dark"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.theme === "dark"}
+            onClick={() => handleThemeChange("dark")}
+          >
+            <Moon size={18} />
+            {uiText.settings.theme.dark}
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -330,6 +404,69 @@ export function SettingsScreen({
 
       <div className="card">
         <div className="sectionTitle">
+          <h2>{uiText.settings.feedbackTitle}</h2>
+          <p>{uiText.settings.feedbackDescription}</p>
+        </div>
+
+        <div className="contactLinks">
+          <a className="contactLink" href={links.email}>
+            <Mail size={21} />
+            <span>
+              <b>{uiText.settings.emailTitle}</b>
+              <small>{uiText.settings.emailDescription}</small>
+            </span>
+            <ExternalLink size={18} />
+          </a>
+
+          <a
+            className="contactLink"
+            href={links.telegram}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Send size={21} />
+            <span>
+              <b>{uiText.settings.telegramTitle}</b>
+              <small>{uiText.settings.telegramDescription}</small>
+            </span>
+            <ExternalLink size={18} />
+          </a>
+
+          <a
+            className="contactLink"
+            href={links.express}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MessageCircle size={21} />
+            <span>
+              <b>{uiText.settings.expressTitle}</b>
+              <small>{uiText.settings.expressDescription}</small>
+            </span>
+            <ExternalLink size={18} />
+          </a>
+        </div>
+      </div>
+
+      <div className="card supportCard">
+        <Gift className="supportIcon" size={26} />
+        <div>
+          <h2>{uiText.settings.supportTitle}</h2>
+          <p>{uiText.settings.supportDescription}</p>
+        </div>
+        <a
+          className="supportButton"
+          href={links.support}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {uiText.settings.supportButton}
+          <ExternalLink size={18} />
+        </a>
+      </div>
+
+      <div className="card">
+        <div className="sectionTitle">
           <h2>{uiText.settings.aboutTitle}</h2>
           <p>{uiText.app.version}</p>
         </div>
@@ -347,38 +484,6 @@ export function SettingsScreen({
           </span>
           <ExternalLink size={18} />
         </a>
-
-        <div className="feedbackLinks">
-          <a
-            className="feedbackLink"
-            href={links.bugReport}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <span>
-              <b>{uiText.settings.bugReportTitle}</b>
-              <small>{uiText.settings.bugReportDescription}</small>
-            </span>
-            <ExternalLink size={18} />
-          </a>
-
-          <a
-            className="feedbackLink"
-            href={links.featureRequest}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <span>
-              <b>{uiText.settings.featureRequestTitle}</b>
-              <small>{uiText.settings.featureRequestDescription}</small>
-            </span>
-            <ExternalLink size={18} />
-          </a>
-        </div>
-
-        <p className="feedbackHint">
-          {uiText.settings.feedbackHint}
-        </p>
 
         <p className="installHint">
           {uiText.settings.installHint}

@@ -1,11 +1,13 @@
-export const APP_VERSION = "1.0.3";
+export const APP_VERSION = "1.0.4";
 
 export const links = {
   github: "https://github.com/48rn2krftk-dev/fuel-rate-calc",
-  bugReport:
-    "https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=bug_report.yml",
-  featureRequest:
-    "https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=feature_request.yml",
+  email:
+    "mailto:comrade.stalin@icloud.com?subject=Горячий%20простой%20—%20обратная%20связь",
+  telegram: "https://t.me/drunken43spark",
+  express:
+    "https://xlnk.ms/open/profile/31871131-d6cb-581e-ba0b-35815e3e06e2",
+  support: "https://tips.yandex.ru/guest/payment/3746623",
 } as const;
 
 export const uiText = {
@@ -138,6 +140,15 @@ export const uiText = {
     saveNorm: "Сохранить норматив",
     normSaved: "Норматив сохранён",
     normCleared: "Норматив очищен",
+    appearanceTitle: "Оформление",
+    appearanceDescription:
+      "Выбери тему приложения или доверь выбор настройкам устройства.",
+    themeSelectorLabel: "Тема приложения",
+    theme: {
+      system: "Системная",
+      light: "Светлая",
+      dark: "Тёмная",
+    },
     slotsTitle: "Слоты сохранения",
     slotsDescription:
       "Здесь хранятся временные сохранения для экрана сложения.",
@@ -162,11 +173,19 @@ export const uiText = {
     aboutTitle: "О приложении",
     githubTitle: "GitHub разработчика",
     developer: "Drunken Spark Dev",
-    bugReportTitle: "Сообщить об ошибке",
-    bugReportDescription: "Что произошло и как это повторить",
-    featureRequestTitle: "Предложить улучшение",
-    featureRequestDescription: "Идея новой функции или изменения",
-    feedbackHint: "Для отправки потребуется аккаунт GitHub.",
+    feedbackTitle: "Связаться с разработчиком",
+    feedbackDescription:
+      "Сообщи об ошибке, предложи улучшение или задай вопрос удобным способом.",
+    emailTitle: "E-mail",
+    emailDescription: "Написать на почту",
+    telegramTitle: "Telegram",
+    telegramDescription: "Написать в Telegram",
+    expressTitle: "eXpress",
+    expressDescription: "Написать в eXpress",
+    supportTitle: "Поддержать разработчика",
+    supportDescription:
+      "Разработка - вещь доступная, но не бесплатная. Если приложение оказалось полезным, поддержи его автора копеечкой <3",
+    supportButton: "Перейти к Яндекс Чаевым",
     installHint:
       "Установка на iPhone: открой приложение в Safari, нажми «Поделиться» и выбери «На экран Домой».",
   },

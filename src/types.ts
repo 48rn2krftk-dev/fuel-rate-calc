@@ -43,5 +43,5 @@ export type HistoryEntry = CalculationResult & {
 
 export type AppSettings = {
   normFuelPerHour: number | null;
-  theme: "light" | "dark";
+  theme: "system" | "light" | "dark";
 };

@@ -6,6 +6,11 @@ import { QuickScreen } from "./screens/QuickScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { SummaryScreen } from "./screens/SummaryScreen";
 import type { HistoryEntry } from "./types";
+import {
+  getSettings,
+  subscribeSettingsChange,
+} from "./utils/storage";
+import { applyTheme } from "./utils/theme";
 
 type Screen = "byTime" | "quick" | "summary" | "settings";
 type ConnectionStatus = "checking" | "online" | "offline";
@@ -16,6 +21,20 @@ export default function App() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
     () => (navigator.onLine ? "checking" : "offline")
   );
+
+  useEffect(() => {
+    let stopWatchingSystemTheme = applyTheme(getSettings().theme);
+
+    const unsubscribeSettings = subscribeSettingsChange(() => {
+      stopWatchingSystemTheme();
+      stopWatchingSystemTheme = applyTheme(getSettings().theme);
+    });
+
+    return () => {
+      stopWatchingSystemTheme();
+      unsubscribeSettings();
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
