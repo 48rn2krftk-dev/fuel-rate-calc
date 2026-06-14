@@ -1,5 +1,6 @@
 import { ExternalLink, GitFork, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { links, uiText } from "../content";
 import type { AppSettings, HistoryEntry } from "../types";
 import { parseFuel } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
@@ -26,9 +27,13 @@ function formatHistoryDate(value: string): string {
 }
 
 function getHistoryType(entry: HistoryEntry): string {
-  if (entry.source.type === "byTime") return "Расчёт по времени";
-  if (entry.source.type === "quick") return "Быстрый расчёт";
-  return "Суммирование";
+  if (entry.source.type === "byTime") {
+    return uiText.settings.historyType.byTime;
+  }
+  if (entry.source.type === "quick") {
+    return uiText.settings.historyType.quick;
+  }
+  return uiText.settings.historyType.summary;
 }
 
 function HistorySource({ entry }: { entry: HistoryEntry }) {
@@ -37,8 +42,9 @@ function HistorySource({ entry }: { entry: HistoryEntry }) {
       <p className="historySource">
         {entry.source.startTime} → {entry.source.endTime}
         <br />
-        Остатки: {formatNumber(entry.source.fuelStart)} →{" "}
-        {formatNumber(entry.source.fuelEnd)} кг
+        {uiText.settings.balances}: {formatNumber(entry.source.fuelStart)} →{" "}
+        {formatNumber(entry.source.fuelEnd)}{" "}
+        {uiText.common.units.kilograms}
       </p>
     );
   }
@@ -46,9 +52,10 @@ function HistorySource({ entry }: { entry: HistoryEntry }) {
   if (entry.source.type === "quick") {
     return (
       <p className="historySource">
-        Время: {entry.source.duration}
+        {uiText.settings.time}: {entry.source.duration}
         <br />
-        Топливо: {formatNumber(entry.source.fuelUsed)} кг
+        {uiText.settings.fuel}: {formatNumber(entry.source.fuelUsed)}{" "}
+        {uiText.common.units.kilograms}
       </p>
     );
   }
@@ -58,14 +65,16 @@ function HistorySource({ entry }: { entry: HistoryEntry }) {
       {entry.source.fuelStart !== null &&
         entry.source.fuelStart !== undefined && (
           <>
-            Начало цепочки: {formatNumber(entry.source.fuelStart)} кг
+            {uiText.settings.chainStart}:{" "}
+            {formatNumber(entry.source.fuelStart)}{" "}
+            {uiText.common.units.kilograms}
             <br />
           </>
         )}
       {entry.source.items
         .map(
           (item) =>
-            `${item.title}: ${formatTime(item.minutes)}, ${formatNumber(item.fuelUsed)} кг`
+            `${item.title}: ${formatTime(item.minutes)}, ${formatNumber(item.fuelUsed)} ${uiText.common.units.kilograms}`
         )
         .join(" · ")}
     </p>
@@ -114,7 +123,7 @@ export function SettingsScreen({
     setSettings(nextSettings);
     saveSettings(nextSettings);
 
-    setSavedMessage("Норматив сохранён");
+    setSavedMessage(uiText.settings.normSaved);
 
     window.setTimeout(() => {
       setSavedMessage("");
@@ -130,7 +139,7 @@ export function SettingsScreen({
     setSettings(nextSettings);
     saveSettings(nextSettings);
     setNormInput("");
-    setSavedMessage("Норматив очищен");
+    setSavedMessage(uiText.settings.normCleared);
 
     window.setTimeout(() => {
       setSavedMessage("");
@@ -141,23 +150,23 @@ export function SettingsScreen({
     <section className="screen">
       <div className="card">
         <div className="sectionTitle">
-          <h2>Настройки</h2>
-          <p>Норматив нужен для сравнения фактического расхода с плановым.</p>
+          <h2>{uiText.settings.title}</h2>
+          <p>{uiText.settings.description}</p>
         </div>
 
         <label className="field">
-          <span>Норматив удельного расхода, кг/ч</span>
+          <span>{uiText.settings.normLabel}</span>
           <input
             value={normInput}
             onChange={(e) => setNormInput(e.target.value)}
             inputMode="decimal"
-            placeholder="Например 45,0"
+            placeholder={uiText.settings.normPlaceholder}
           />
         </label>
 
         {normError && (
           <div className="errorBox">
-            Введи норматив от 0 до 9999,999 кг/ч.
+            {uiText.settings.normError}
           </div>
         )}
 
@@ -168,7 +177,7 @@ export function SettingsScreen({
             onClick={handleSaveNorm}
             disabled={normError}
           >
-            Сохранить норматив
+            {uiText.settings.saveNorm}
           </button>
 
           <button
@@ -176,7 +185,7 @@ export function SettingsScreen({
             type="button"
             onClick={handleClearNorm}
           >
-            Очистить
+            {uiText.common.clear}
           </button>
         </div>
 
@@ -185,25 +194,27 @@ export function SettingsScreen({
 
       <div className="card">
         <div className="sectionTitle">
-          <h2>Слоты сохранения</h2>
-          <p>Здесь хранятся временные сохранения для суммирования.</p>
+          <h2>{uiText.settings.slotsTitle}</h2>
+          <p>{uiText.settings.slotsDescription}</p>
         </div>
 
         <div className="slotList">
           {slots.map((slot, index) => (
             <div className="slotInfo" key={index}>
               <div>
-                <b>Слот {index + 1}</b>
+                <b>{uiText.settings.slot(index + 1)}</b>
 
                 {slot ? (
                   <p>
                     {slot.title}
                     <br />
-                    {formatTime(slot.minutes)} · {formatNumber(slot.fuelUsed)} кг
-                    · {formatNumber(slot.fuelPerHour)} кг/ч
+                    {formatTime(slot.minutes)} · {formatNumber(slot.fuelUsed)}{" "}
+                    {uiText.common.units.kilograms} ·{" "}
+                    {formatNumber(slot.fuelPerHour)}{" "}
+                    {uiText.common.units.kilogramsPerHour}
                   </p>
                 ) : (
-                  <p>Пустой</p>
+                  <p>{uiText.settings.emptySlot}</p>
                 )}
               </div>
 
@@ -213,7 +224,7 @@ export function SettingsScreen({
                   type="button"
                   onClick={() => clearSlot(index)}
                 >
-                  Очистить
+                  {uiText.common.clear}
                 </button>
               )}
             </div>
@@ -224,10 +235,8 @@ export function SettingsScreen({
       <div className="card">
         <div className="historyTitle">
           <div className="sectionTitle">
-            <h2>История расчётов</h2>
-            <p>
-              Постоянный журнал сохранённых результатов и исходных данных.
-            </p>
+            <h2>{uiText.settings.historyTitle}</h2>
+            <p>{uiText.settings.historyDescription}</p>
           </div>
 
           {history.length > 0 && (
@@ -236,13 +245,13 @@ export function SettingsScreen({
               type="button"
               onClick={clearHistory}
             >
-              Очистить всё
+              {uiText.common.clearAll}
             </button>
           )}
         </div>
 
         {history.length === 0 ? (
-          <p className="emptyHistory">Сохранённых расчётов пока нет.</p>
+          <p className="emptyHistory">{uiText.settings.emptyHistory}</p>
         ) : (
           <div className="historyList">
             {history.map((entry) => {
@@ -281,7 +290,9 @@ export function SettingsScreen({
                         event.stopPropagation();
                         clearHistoryEntry(entry.id);
                       }}
-                      aria-label={`Удалить запись ${entry.title}`}
+                      aria-label={uiText.settings.deleteHistoryEntry(
+                        entry.title
+                      )}
                     >
                       <Trash2 size={17} />
                     </button>
@@ -291,15 +302,23 @@ export function SettingsScreen({
 
                   <div className="historyResult">
                     <span>{formatTime(entry.minutes)}</span>
-                    <span>{formatNumber(entry.fuelUsed)} кг</span>
-                    <b>{formatNumber(entry.fuelPerHour)} кг/ч</b>
+                    <span>
+                      {formatNumber(entry.fuelUsed)}{" "}
+                      {uiText.common.units.kilograms}
+                    </span>
+                    <b>
+                      {formatNumber(entry.fuelPerHour)}{" "}
+                      {uiText.common.units.kilogramsPerHour}
+                    </b>
                   </div>
 
                   {entry.normFuelPerHour !== null && normFuel !== null && (
                     <p className="historyNorm">
-                      Норма на момент расчёта:{" "}
-                      {formatNumber(entry.normFuelPerHour)} кг/ч ·{" "}
-                      {formatNumber(normFuel)} кг за период
+                      {uiText.settings.calculationNorm}:{" "}
+                      {formatNumber(entry.normFuelPerHour)}{" "}
+                      {uiText.common.units.kilogramsPerHour} ·{" "}
+                      {formatNumber(normFuel)} {uiText.common.units.kilograms}{" "}
+                      {uiText.settings.forPeriod}
                     </p>
                   )}
                 </article>
@@ -311,20 +330,20 @@ export function SettingsScreen({
 
       <div className="card">
         <div className="sectionTitle">
-          <h2>О приложении</h2>
-          <p>Горячий простой · версия 1.0.3</p>
+          <h2>{uiText.settings.aboutTitle}</h2>
+          <p>{uiText.app.version}</p>
         </div>
 
         <a
           className="githubLink"
-          href="https://github.com/48rn2krftk-dev/fuel-rate-calc"
+          href={links.github}
           target="_blank"
           rel="noreferrer"
         >
           <GitFork size={21} />
           <span>
-            <b>GitHub разработчика</b>
-            <small>48rn2krftk-dev</small>
+            <b>{uiText.settings.githubTitle}</b>
+            <small>{uiText.settings.developer}</small>
           </span>
           <ExternalLink size={18} />
         </a>
@@ -332,38 +351,37 @@ export function SettingsScreen({
         <div className="feedbackLinks">
           <a
             className="feedbackLink"
-            href="https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=bug_report.yml"
+            href={links.bugReport}
             target="_blank"
             rel="noreferrer"
           >
             <span>
-              <b>Сообщить об ошибке</b>
-              <small>Что произошло и как это повторить</small>
+              <b>{uiText.settings.bugReportTitle}</b>
+              <small>{uiText.settings.bugReportDescription}</small>
             </span>
             <ExternalLink size={18} />
           </a>
 
           <a
             className="feedbackLink"
-            href="https://github.com/48rn2krftk-dev/fuel-rate-calc/issues/new?template=feature_request.yml"
+            href={links.featureRequest}
             target="_blank"
             rel="noreferrer"
           >
             <span>
-              <b>Предложить улучшение</b>
-              <small>Идея новой функции или изменения</small>
+              <b>{uiText.settings.featureRequestTitle}</b>
+              <small>{uiText.settings.featureRequestDescription}</small>
             </span>
             <ExternalLink size={18} />
           </a>
         </div>
 
         <p className="feedbackHint">
-          Для отправки потребуется аккаунт GitHub.
+          {uiText.settings.feedbackHint}
         </p>
 
         <p className="installHint">
-          Установка на iPhone: открой приложение в Safari, нажми «Поделиться» и
-          выбери «На экран Домой».
+          {uiText.settings.installHint}
         </p>
       </div>
     </section>

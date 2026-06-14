@@ -1,5 +1,6 @@
 import { Calculator, Clock3, Layers3, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { uiText } from "./content";
 import { ByTimeScreen } from "./screens/ByTimeScreen";
 import { QuickScreen } from "./screens/QuickScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -104,8 +105,8 @@ export default function App() {
     <div className="app">
       <header className="appHeader">
         <div>
-          <p className="appEyebrow">PWA калькулятор</p>
-          <h1>Горячий простой</h1>
+          <p className="appEyebrow">{uiText.app.eyebrow}</p>
+          <h1>{uiText.app.title}</h1>
         </div>
 
         <div
@@ -115,10 +116,10 @@ export default function App() {
         >
           <span className="connectionDot" />
           {connectionStatus === "checking"
-            ? "Проверка"
+            ? uiText.app.connection.checking
             : connectionStatus === "online"
-              ? "Онлайн"
-              : "Офлайн"}
+              ? uiText.app.connection.online
+              : uiText.app.connection.offline}
         </div>
       </header>
 
@@ -158,7 +159,7 @@ export default function App() {
           onClick={() => navigate("byTime")}
         >
           <Clock3 size={21} />
-          <span>Время</span>
+          <span>{uiText.app.navigation.byTime}</span>
         </button>
 
         <button
@@ -166,7 +167,7 @@ export default function App() {
           onClick={() => navigate("quick")}
         >
           <Calculator size={21} />
-          <span>Быстро</span>
+          <span>{uiText.app.navigation.quick}</span>
         </button>
 
         <button
@@ -174,7 +175,7 @@ export default function App() {
           onClick={() => navigate("summary")}
         >
           <Layers3 size={21} />
-          <span>Сумма</span>
+          <span>{uiText.app.navigation.summary}</span>
         </button>
 
         <button
@@ -182,7 +183,7 @@ export default function App() {
           onClick={() => navigate("settings")}
         >
           <Settings size={21} />
-          <span>Ещё</span>
+          <span>{uiText.app.navigation.settings}</span>
         </button>
       </nav>
     </div>

@@ -2,6 +2,7 @@ import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
+import { uiText } from "../content";
 import type { CalculationResult, HistoryEntry, SlotData } from "../types";
 import {
   calculateManual,
@@ -151,7 +152,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
               : null;
 
           return {
-            title: slot?.title || `Прогрев ${index + 1}`,
+            title: slot?.title || uiText.summary.heating(index + 1),
             minutes: result?.minutes ?? 0,
             fuelUsed: result?.fuelUsed ?? 0,
           };
@@ -215,32 +216,29 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
     <section className="screen">
       <div className="card">
         <div className="sectionTitle">
-          <h2>Суммирование</h2>
-          <p>
-            Сложи несколько прогревов из сохранённых слотов или введи их
-            вручную.
-          </p>
+          <h2>{uiText.summary.title}</h2>
+          <p>{uiText.summary.description}</p>
         </div>
 
         <label className="field summaryFuelStart">
-          <span>Топливо в начале цепочки, кг (необязательно)</span>
+          <span>{uiText.summary.fuelStart}</span>
           <input
             value={fuelStart}
             onChange={(event) => setFuelStart(event.target.value)}
-            placeholder="411,000"
+            placeholder={uiText.summary.fuelStartPlaceholder}
             inputMode="decimal"
           />
         </label>
 
         {fuelStartError && (
           <div className="errorBox">
-            Введи начальное топливо от 0 до 9999,999 кг.
+            {uiText.summary.fuelStartError}
           </div>
         )}
 
         {fuelChainError && (
           <div className="errorBox">
-            Общий расход не может превышать топливо в начале цепочки.
+            {uiText.summary.fuelChainError}
           </div>
         )}
 
@@ -259,14 +257,14 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
             return (
               <div className="summaryRowCard" key={row.id}>
                 <div className="summaryRowHeader">
-                  <b>Прогрев {index + 1}</b>
+                  <b>{uiText.summary.heating(index + 1)}</b>
 
                   {rows.length > 2 && (
                     <button
                       className="iconDangerButton"
                       type="button"
                       onClick={() => removeRow(row.id)}
-                      aria-label={`Удалить прогрев ${index + 1}`}
+                      aria-label={uiText.summary.deleteHeating(index + 1)}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -283,7 +281,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                     type="button"
                     onClick={() => setMode(row, "manual")}
                   >
-                    Вручную
+                    {uiText.summary.manual}
                   </button>
                   <button
                     className={
@@ -295,13 +293,13 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                     onClick={() => setMode(row, "slot")}
                     disabled={filledSlots.length === 0}
                   >
-                    Из слота
+                    {uiText.summary.fromSlot}
                   </button>
                 </div>
 
                 {row.mode === "slot" ? (
                   <label className="field">
-                    <span>Сохранённый расчёт</span>
+                    <span>{uiText.summary.savedCalculation}</span>
                     <select
                       className="selectInput"
                       value={row.slotSavedAt}
@@ -311,7 +309,10 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                     >
                       {filledSlots.map((slot, slotIndex) => (
                         <option value={slot.savedAt} key={slot.savedAt}>
-                          Слот {slotIndex + 1}: {slot.title}
+                          {uiText.summary.slotOption(
+                            slotIndex + 1,
+                            slot.title
+                          )}
                         </option>
                       ))}
                     </select>
@@ -319,39 +320,39 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                 ) : (
                   <div className="grid">
                     <label className="field">
-                      <span>Время прогрева</span>
+                      <span>{uiText.summary.duration}</span>
                       <input
                         value={row.duration}
                         onBlur={() => handleDurationBlur(row)}
                         onChange={(event) =>
                           updateRow(row.id, { duration: event.target.value })
                         }
-                        placeholder="2214 или 163559"
+                        placeholder={uiText.summary.durationPlaceholder}
                         inputMode="numeric"
                       />
                     </label>
 
                     <label className="field">
-                      <span>Израсходовано топлива, кг</span>
+                      <span>{uiText.summary.fuelUsed}</span>
                       <input
                         value={row.fuelUsed}
                         onChange={(event) =>
                           updateRow(row.id, { fuelUsed: event.target.value })
                         }
-                        placeholder="40,000"
+                        placeholder={uiText.summary.fuelUsedPlaceholder}
                         inputMode="decimal"
                       />
                     </label>
 
                     {durationError && (
                       <div className="errorBox">
-                        Введи время в формате 22:14, 2214 или 163559.
+                        {uiText.summary.durationError}
                       </div>
                     )}
 
                     {fuelError && (
                       <div className="errorBox">
-                        Введи топливо от 0 до 9999,999 кг.
+                        {uiText.summary.fuelError}
                       </div>
                     )}
                   </div>
@@ -360,7 +361,8 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
                 {result && (
                   <div className="miniResult">
                     {formatTime(result.minutes)} ·{" "}
-                    {formatNumber(result.fuelUsed)} кг
+                    {formatNumber(result.fuelUsed)}{" "}
+                    {uiText.common.units.kilograms}
                   </div>
                 )}
               </div>
@@ -375,7 +377,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
             onClick={() => setRows((currentRows) => [...currentRows, createRow()])}
           >
             <Plus size={18} />
-            Добавить ещё
+            {uiText.summary.addMore}
           </button>
 
           <button
@@ -384,33 +386,37 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
             onClick={clearRows}
           >
             <RotateCcw size={18} />
-            Очистить всё
+            {uiText.common.clearAll}
           </button>
         </div>
       </div>
 
       <div className="resultCard">
         <p>
-          Общее время:{" "}
-          {visibleCalculation ? formatTime(visibleCalculation.minutes) : "—"}
+          {uiText.summary.totalTime}:{" "}
+          {visibleCalculation
+            ? formatTime(visibleCalculation.minutes)
+            : uiText.common.emptyValue}
         </p>
         <p>
-          Общий расход:{" "}
+          {uiText.summary.totalFuel}:{" "}
           {visibleCalculation
-            ? `${formatNumber(visibleCalculation.fuelUsed)} кг`
-            : "—"}
+            ? `${formatNumber(visibleCalculation.fuelUsed)} ${uiText.common.units.kilograms}`
+            : uiText.common.emptyValue}
         </p>
         <p>
-          Средний расход в час:{" "}
+          {uiText.summary.averageFuelPerHour}:{" "}
           {visibleCalculation
-            ? `${formatNumber(visibleCalculation.fuelPerHour)} кг/ч`
-            : "—"}
+            ? `${formatNumber(visibleCalculation.fuelPerHour)} ${uiText.common.units.kilogramsPerHour}`
+            : uiText.common.emptyValue}
         </p>
 
         {actualFuelEnd !== null && (
           <div className="actualFuelEnd">
-            <span>Остаток по фактическому расходу</span>
-            <b>{formatNumber(actualFuelEnd)} кг</b>
+            <span>{uiText.summary.actualFuelEnd}</span>
+            <b>
+              {formatNumber(actualFuelEnd)} {uiText.common.units.kilograms}
+            </b>
           </div>
         )}
 
@@ -424,7 +430,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
 
         <SaveResultPanel
           result={visibleCalculation}
-          defaultTitle="Суммирование"
+          defaultTitle={uiText.summary.title}
           source={visibleCalculation ? historySource : null}
         />
       </div>

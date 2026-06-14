@@ -2,6 +2,7 @@ import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
+import { uiText } from "../content";
 import type { HistoryEntry } from "../types";
 import {
   calculateByFuelDifference,
@@ -406,13 +407,13 @@ useEffect(() => {
     <section className="screen">
       <div className="card">
         <div className="sectionTitle">
-          <h2>Расчёт по времени</h2>
-          <p>Введи время начала, окончания и остатки топлива.</p>
+          <h2>{uiText.byTime.title}</h2>
+          <p>{uiText.byTime.description}</p>
         </div>
 
         <div className="grid">
           <label className="field">
-            <span>Начало прогрева</span>
+            <span>{uiText.byTime.startTime}</span>
             <input
               value={startTime}
               onBlur={handleStartBlur}
@@ -420,13 +421,13 @@ useEffect(() => {
                 setStartTime(e.target.value);
                 setNextDay(false);
               }}
-              placeholder="0735 или 0101260735"
+              placeholder={uiText.byTime.startTimePlaceholder}
               inputMode="numeric"
             />
           </label>
 
           <label className="field">
-            <span>Окончание прогрева</span>
+            <span>{uiText.byTime.endTime}</span>
             <input
               value={endTime}
               onBlur={handleEndBlur}
@@ -434,28 +435,28 @@ useEffect(() => {
                 setEndTime(e.target.value);
                 setNextDay(false);
               }}
-              placeholder="0910 или 0201260910"
+              placeholder={uiText.byTime.endTimePlaceholder}
               inputMode="numeric"
             />
           </label>
 
           <label className="field">
-            <span>Топливо при приёмке, кг</span>
+            <span>{uiText.byTime.fuelStart}</span>
             <input
               value={fuelStart}
               onChange={(e) => setFuelStart(e.target.value)}
               inputMode="decimal"
-              placeholder="411,000"
+              placeholder={uiText.byTime.fuelPlaceholder}
             />
           </label>
 
           <label className="field">
-            <span>Топливо при сдаче, кг</span>
+            <span>{uiText.byTime.fuelEnd}</span>
             <input
               value={fuelEnd}
               onChange={(e) => setFuelEnd(e.target.value)}
               inputMode="decimal"
-              placeholder="371,000"
+              placeholder={uiText.byTime.fuelEndPlaceholder}
             />
           </label>
         </div>
@@ -466,43 +467,54 @@ useEffect(() => {
           onClick={clearAll}
         >
           <RotateCcw size={18} />
-          Очистить всё
+          {uiText.common.clearAll}
         </button>
 
         <button className="secondaryButton ocrButton" type="button" disabled>
-          <span>📷 Считать из ведомости</span>
-          <span className="soonBadge">Скоро</span>
+          <span>{uiText.byTime.ocr}</span>
+          <span className="soonBadge">{uiText.byTime.soon}</span>
         </button>
 
         {needNextDayWarning && (
           <div className="warningBox">
-            <p>Окончание меньше начала. Считать окончание следующими сутками?</p>
-            <button onClick={confirmNextDay}>Да, следующими</button>
+            <p>{uiText.byTime.nextDayQuestion}</p>
+            <button onClick={confirmNextDay}>
+              {uiText.byTime.nextDayConfirm}
+            </button>
           </div>
         )}
 
         {mixedDateError && (
           <div className="errorBox">
-            Если дата указана только в одном поле, она должна быть в поле начала.
+            {uiText.byTime.mixedDateError}
           </div>
         )}
 
         {fuelError && (
           <div className="errorBox">
-            Топливо при сдаче не может превышать топливо при приёмке.
+            {uiText.byTime.fuelError}
           </div>
         )}
       </div>
 
       <div className="resultCard">
-        <p>Время прогрева: {calculation ? formatTime(calculation.minutes) : "—"}</p>
         <p>
-          Израсходовано:{" "}
-          {calculation ? `${formatNumber(calculation.fuelUsed)} кг` : "—"}
+          {uiText.common.result.heatingTime}:{" "}
+          {calculation
+            ? formatTime(calculation.minutes)
+            : uiText.common.emptyValue}
         </p>
         <p>
-          Расход в час:{" "}
-          {calculation ? `${formatNumber(calculation.fuelPerHour)} кг/ч` : "—"}
+          {uiText.common.result.fuelUsed}:{" "}
+          {calculation
+            ? `${formatNumber(calculation.fuelUsed)} ${uiText.common.units.kilograms}`
+            : uiText.common.emptyValue}
+        </p>
+        <p>
+          {uiText.common.result.fuelPerHour}:{" "}
+          {calculation
+            ? `${formatNumber(calculation.fuelPerHour)} ${uiText.common.units.kilogramsPerHour}`
+            : uiText.common.emptyValue}
         </p>
 
         {calculation && (
@@ -515,7 +527,7 @@ useEffect(() => {
 
         <SaveResultPanel
           result={calculation}
-          defaultTitle="Расчёт по времени"
+          defaultTitle={uiText.byTime.title}
           source={
             calculation &&
             fuelStartParsed !== null &&

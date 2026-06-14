@@ -2,6 +2,7 @@ import { RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
+import { uiText } from "../content";
 import type { HistoryEntry } from "../types";
 import { calculateManual, parseFuel } from "../utils/calculations";
 import {
@@ -65,28 +66,28 @@ useEffect(() => {
     <section className="screen">
       <div className="card">
         <div className="sectionTitle">
-          <h2>Быстрый расчёт</h2>
-          <p>Введи готовое время прогрева и израсходованное топливо.</p>
+          <h2>{uiText.quick.title}</h2>
+          <p>{uiText.quick.description}</p>
         </div>
 
         <div className="grid">
           <label className="field">
-            <span>Время прогрева</span>
+            <span>{uiText.quick.duration}</span>
             <input
               value={duration}
               onBlur={handleDurationBlur}
               onChange={(e) => setDuration(e.target.value)}
-              placeholder="2214 или 163559"
+              placeholder={uiText.quick.durationPlaceholder}
               inputMode="numeric"
             />
           </label>
 
           <label className="field">
-            <span>Израсходовано топлива, кг</span>
+            <span>{uiText.quick.fuelUsed}</span>
             <input
               value={fuelUsed}
               onChange={(e) => setFuelUsed(e.target.value)}
-              placeholder="40,000"
+              placeholder={uiText.quick.fuelPlaceholder}
               inputMode="decimal"
             />
           </label>
@@ -98,31 +99,40 @@ useEffect(() => {
           onClick={clearAll}
         >
           <RotateCcw size={18} />
-          Очистить всё
+          {uiText.common.clearAll}
         </button>
 
         {durationError && (
           <div className="errorBox">
-            Введи время в формате 22:14, 2214 или 163559.
+            {uiText.quick.durationError}
           </div>
         )}
 
         {fuelError && (
           <div className="errorBox">
-            Введи топливо от 0 до 9999,999 кг (не более 3-ех знаков после запятой).
+            {uiText.quick.fuelError}
           </div>
         )}
       </div>
 
       <div className="resultCard">
-        <p>Время прогрева: {calculation ? formatTime(calculation.minutes) : "—"}</p>
         <p>
-          Израсходовано:{" "}
-          {calculation ? `${formatNumber(calculation.fuelUsed)} кг` : "—"}
+          {uiText.common.result.heatingTime}:{" "}
+          {calculation
+            ? formatTime(calculation.minutes)
+            : uiText.common.emptyValue}
         </p>
         <p>
-          Расход в час:{" "}
-          {calculation ? `${formatNumber(calculation.fuelPerHour)} кг/ч` : "—"}
+          {uiText.common.result.fuelUsed}:{" "}
+          {calculation
+            ? `${formatNumber(calculation.fuelUsed)} ${uiText.common.units.kilograms}`
+            : uiText.common.emptyValue}
+        </p>
+        <p>
+          {uiText.common.result.fuelPerHour}:{" "}
+          {calculation
+            ? `${formatNumber(calculation.fuelPerHour)} ${uiText.common.units.kilogramsPerHour}`
+            : uiText.common.emptyValue}
         </p>
 
         {calculation && (
@@ -134,7 +144,7 @@ useEffect(() => {
 
         <SaveResultPanel
           result={calculation}
-          defaultTitle="Быстрый расчёт"
+          defaultTitle={uiText.quick.title}
           source={
             calculation
               ? {

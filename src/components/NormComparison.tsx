@@ -1,3 +1,4 @@
+import { uiText } from "../content";
 import type { CalculationResult } from "../types";
 import { calculateDeviation } from "../utils/calculations";
 import { formatNumber } from "../utils/format";
@@ -32,10 +33,13 @@ export function NormComparison({
     <div className="normComparison">
       {deviation !== null && Math.abs(deviation) > 0.000001 ? (
         <p className={deviation < 0 ? "deviation good" : "deviation bad"}>
-          {deviation < 0 ? "↓" : "↑"} {formatNumber(percentOfNorm)} % от нормы
+          {deviation < 0 ? "↓" : "↑"} {formatNumber(percentOfNorm)}{" "}
+          {uiText.normComparison.percentOfNorm}
         </p>
       ) : (
-        <p className="deviation neutral">Расход соответствует норме</p>
+        <p className="deviation neutral">
+          {uiText.normComparison.matchesNorm}
+        </p>
       )}
 
       {!matchesNorm && (
@@ -43,16 +47,22 @@ export function NormComparison({
           <div className={isWithinNorm ? "normBalance good" : "normBalance bad"}>
             <span>
               {isWithinNorm
-                ? "Резерв до нормы"
-                : "Перерасход относительно нормы"}
+                ? uiText.normComparison.reserve
+                : uiText.normComparison.overrun}
             </span>
-            <b>{formatNumber(Math.abs(balance))} кг</b>
+            <b>
+              {formatNumber(Math.abs(balance))}{" "}
+              {uiText.common.units.kilograms}
+            </b>
           </div>
 
           {normativeFuelEnd !== null && (
             <div className="normBalance neutral">
-              <span>Расчётный остаток при сдаче по нормативу</span>
-              <b>{formatNumber(normativeFuelEnd)} кг</b>
+              <span>{uiText.normComparison.normativeFuelEnd}</span>
+              <b>
+                {formatNumber(normativeFuelEnd)}{" "}
+                {uiText.common.units.kilograms}
+              </b>
             </div>
           )}
         </>

@@ -1,5 +1,6 @@
 import { Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { uiText } from "../content";
 import type {
   CalculationResult,
   CalculationSource,
@@ -114,8 +115,8 @@ export function SaveResultPanel({
 
     showMessage(
       isOverwrite
-        ? `Слот ${slotIndex + 1} перезаписан`
-        : `Сохранено в слот ${slotIndex + 1}`
+        ? uiText.saveResult.slotOverwritten(slotIndex + 1)
+        : uiText.saveResult.savedToSlot(slotIndex + 1)
     );
   }
 
@@ -128,7 +129,7 @@ export function SaveResultPanel({
         onClick={handleOpen}
       >
         <Save size={18} />
-        Сохранить
+        {uiText.common.save}
       </button>
 
       {message && <div className="successBox">{message}</div>}
@@ -139,16 +140,16 @@ export function SaveResultPanel({
             className="modalSheet"
             role="dialog"
             aria-modal="true"
-            aria-label="Сохранение результата"
+            aria-label={uiText.saveResult.dialogLabel}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="modalHeader">
               <div>
-                <h2>Сохранить результат</h2>
+                <h2>{uiText.saveResult.title}</h2>
                 <p>
                   {filledSlotsCount === 0
-                    ? "Задай название и сохрани первый слот."
-                    : "Можно перезаписать существующий слот или сохранить в новый."}
+                    ? uiText.saveResult.firstSlotDescription
+                    : uiText.saveResult.existingSlotsDescription}
                 </p>
               </div>
 
@@ -156,18 +157,18 @@ export function SaveResultPanel({
                 className="iconButton"
                 type="button"
                 onClick={handleClose}
-                aria-label="Закрыть"
+                aria-label={uiText.saveResult.close}
               >
                 <X size={20} />
               </button>
             </div>
 
             <label className="field">
-              <span>Название сохранения</span>
+              <span>{uiText.saveResult.nameLabel}</span>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Например 3ТЭ25К2М-697 секция 1"
+                placeholder={uiText.saveResult.namePlaceholder}
                 autoFocus
               />
             </label>
@@ -178,7 +179,7 @@ export function SaveResultPanel({
                 type="button"
                 onClick={() => handleSave(0)}
               >
-                Сохранить в слот 1
+                {uiText.saveResult.saveToSlot(1)}
               </button>
             ) : (
               <div className="slotList">
@@ -194,18 +195,20 @@ export function SaveResultPanel({
                     >
                       <span className="slotButtonTitle">
                         {slot
-                          ? `Слот ${index + 1} — перезаписать`
-                          : `Слот ${index + 1} — сохранить в новый`}
+                          ? uiText.saveResult.overwriteSlot(index + 1)
+                          : uiText.saveResult.saveToNewSlot(index + 1)}
                       </span>
 
                       {slot ? (
                         <span className="slotButtonMeta">
-                          Сейчас: {slot.title} · {formatTime(slot.minutes)} ·{" "}
-                          {formatNumber(slot.fuelPerHour)} кг/ч
+                          {uiText.saveResult.current}: {slot.title} ·{" "}
+                          {formatTime(slot.minutes)} ·{" "}
+                          {formatNumber(slot.fuelPerHour)}{" "}
+                          {uiText.common.units.kilogramsPerHour}
                         </span>
                       ) : (
                         <span className="slotButtonMeta">
-                          Новый свободный слот
+                          {uiText.saveResult.emptySlot}
                         </span>
                       )}
                     </button>
