@@ -44,4 +44,16 @@ export type HistoryEntry = CalculationResult & {
 export type AppSettings = {
   normFuelPerHour: number | null;
   theme: "system" | "light" | "dark";
+  pinnedScreenIds: PinnedScreenId[];
 };
+
+export type ScreenId =
+  | "quick"
+  | "summary"
+  | "thuLibrary"
+  | "mmLibrary"
+  | "chains"
+  | "settings"
+  | "all";
+
+export type PinnedScreenId = Exclude<ScreenId, "all">;

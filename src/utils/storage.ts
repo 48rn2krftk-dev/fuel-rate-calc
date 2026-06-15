@@ -1,4 +1,5 @@
 import type { AppSettings, HistoryEntry, SlotData } from "../types";
+import { normalizePinnedScreens } from "../navigation";
 
 const SETTINGS_KEY = "hotIdle.settings";
 const SLOTS_KEY = "hotIdle.slots";
@@ -13,6 +14,7 @@ export function getSettings(): AppSettings {
     return {
       normFuelPerHour: null,
       theme: "system",
+      pinnedScreenIds: normalizePinnedScreens(null),
     };
   }
 
@@ -30,11 +32,13 @@ export function getSettings(): AppSettings {
         parsed.theme === "system"
           ? parsed.theme
           : "system",
+      pinnedScreenIds: normalizePinnedScreens(parsed.pinnedScreenIds),
     };
   } catch {
     return {
       normFuelPerHour: null,
       theme: "system",
+      pinnedScreenIds: normalizePinnedScreens(null),
     };
   }
 }

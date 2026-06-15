@@ -1,4 +1,5 @@
-const CACHE_NAME = "hot-idle-v5";
+const CACHE_PREFIX = "teplotekhnik-test-";
+const CACHE_NAME = `${CACHE_PREFIX}v1`;
 const APP_SHELL = new URL("./", self.registration.scope).href;
 const STATIC_FILES = [
   "manifest.webmanifest",
@@ -38,7 +39,9 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter(
+              (key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME
+            )
             .map((key) => caches.delete(key))
         )
       )

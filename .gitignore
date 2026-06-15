@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env
 
+# Local project context for Codex roles
+PROJECT_STATE.md
+
 
 # Editor directories and files
 .vscode/*

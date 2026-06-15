@@ -1,4 +1,6 @@
 import {
+  ArrowDown,
+  ArrowUp,
   ExternalLink,
   Gift,
   GitFork,
@@ -12,19 +14,24 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { links, uiText } from "../content";
-import type { AppSettings, HistoryEntry } from "../types";
+import {
+  MAX_PINNED_SCREENS,
+  screenDefinitions,
+} from "../navigation";
+import type {
+  AppSettings,
+  HistoryEntry,
+  PinnedScreenId,
+} from "../types";
 import { parseFuel } from "../utils/calculations";
 import { formatNumber, formatTime } from "../utils/format";
 import {
   clearHistory,
   clearHistoryEntry,
-  clearSlot,
   getHistory,
   getSettings,
-  getSlots,
   saveSettings,
   subscribeHistoryChange,
-  subscribeSlotsChange,
 } from "../utils/storage";
 
 function formatHistoryDate(value: string): string {
@@ -105,14 +112,8 @@ export function SettingsScreen({
     return norm === null ? "" : formatNumber(norm);
   });
   const [savedMessage, setSavedMessage] = useState("");
-  const [slots, setSlots] = useState(() => getSlots());
+  const [quickAccessMessage, setQuickAccessMessage] = useState("");
   const [history, setHistory] = useState(() => getHistory());
-
-  useEffect(() => {
-    return subscribeSlotsChange(() => {
-      setSlots(getSlots());
-    });
-  }, []);
 
   useEffect(() => {
     return subscribeHistoryChange(() => {
@@ -162,6 +163,52 @@ export function SettingsScreen({
       ...settings,
       theme,
     };
+
+    setSettings(nextSettings);
+    saveSettings(nextSettings);
+  }
+
+  function togglePinnedScreen(screenId: PinnedScreenId) {
+    const isPinned = settings.pinnedScreenIds.includes(screenId);
+
+    if (isPinned && settings.pinnedScreenIds.length === 1) {
+      setQuickAccessMessage(uiText.settings.quickAccessMinimum);
+      return;
+    }
+
+    if (!isPinned && settings.pinnedScreenIds.length >= MAX_PINNED_SCREENS) {
+      setQuickAccessMessage(uiText.settings.quickAccessLimit);
+      return;
+    }
+
+    const pinnedScreenIds = isPinned
+      ? settings.pinnedScreenIds.filter((id) => id !== screenId)
+      : [...settings.pinnedScreenIds, screenId];
+    const nextSettings = { ...settings, pinnedScreenIds };
+
+    setSettings(nextSettings);
+    saveSettings(nextSettings);
+    setQuickAccessMessage("");
+  }
+
+  function movePinnedScreen(screenId: PinnedScreenId, direction: -1 | 1) {
+    const currentIndex = settings.pinnedScreenIds.indexOf(screenId);
+    const targetIndex = currentIndex + direction;
+
+    if (
+      currentIndex < 0 ||
+      targetIndex < 0 ||
+      targetIndex >= settings.pinnedScreenIds.length
+    ) {
+      return;
+    }
+
+    const pinnedScreenIds = [...settings.pinnedScreenIds];
+    [pinnedScreenIds[currentIndex], pinnedScreenIds[targetIndex]] = [
+      pinnedScreenIds[targetIndex],
+      pinnedScreenIds[currentIndex],
+    ];
+    const nextSettings = { ...settings, pinnedScreenIds };
 
     setSettings(nextSettings);
     saveSettings(nextSettings);
@@ -268,42 +315,62 @@ export function SettingsScreen({
 
       <div className="card">
         <div className="sectionTitle">
-          <h2>{uiText.settings.slotsTitle}</h2>
-          <p>{uiText.settings.slotsDescription}</p>
+          <h2>{uiText.settings.quickAccessTitle}</h2>
+          <p>{uiText.settings.quickAccessDescription}</p>
         </div>
 
-        <div className="slotList">
-          {slots.map((slot, index) => (
-            <div className="slotInfo" key={index}>
-              <div>
-                <b>{uiText.settings.slot(index + 1)}</b>
+        <div className="quickAccessList">
+          {screenDefinitions
+            .filter((screen) => screen.pinnable)
+            .map((screen) => {
+              const screenId = screen.id as PinnedScreenId;
+              const position = settings.pinnedScreenIds.indexOf(screenId);
+              const isPinned = position >= 0;
 
-                {slot ? (
-                  <p>
-                    {slot.title}
-                    <br />
-                    {formatTime(slot.minutes)} · {formatNumber(slot.fuelUsed)}{" "}
-                    {uiText.common.units.kilograms} ·{" "}
-                    {formatNumber(slot.fuelPerHour)}{" "}
-                    {uiText.common.units.kilogramsPerHour}
-                  </p>
-                ) : (
-                  <p>{uiText.settings.emptySlot}</p>
-                )}
-              </div>
+              return (
+                <div className="quickAccessItem" key={screen.id}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isPinned}
+                      onChange={() => togglePinnedScreen(screenId)}
+                    />
+                    <span>
+                      <b>{screen.title}</b>
+                      <small>{screen.description}</small>
+                    </span>
+                  </label>
 
-              {slot && (
-                <button
-                  className="dangerButton"
-                  type="button"
-                  onClick={() => clearSlot(index)}
-                >
-                  {uiText.common.clear}
-                </button>
-              )}
-            </div>
-          ))}
+                  {isPinned && (
+                    <div className="quickAccessOrder">
+                      <button
+                        type="button"
+                        aria-label={`Поднять ${screen.title}`}
+                        disabled={position === 0}
+                        onClick={() => movePinnedScreen(screenId, -1)}
+                      >
+                        <ArrowUp size={17} />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Опустить ${screen.title}`}
+                        disabled={
+                          position === settings.pinnedScreenIds.length - 1
+                        }
+                        onClick={() => movePinnedScreen(screenId, 1)}
+                      >
+                        <ArrowDown size={17} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
         </div>
+
+        {quickAccessMessage && (
+          <div className="warningBox">{quickAccessMessage}</div>
+        )}
       </div>
 
       <div className="card">

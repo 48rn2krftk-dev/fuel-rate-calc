@@ -1,5 +1,6 @@
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CalculationResultCard } from "../components/CalculationResultCard";
 import { NormComparison } from "../components/NormComparison";
 import { SaveResultPanel } from "../components/SaveResultPanel";
 import { uiText } from "../content";
@@ -391,26 +392,14 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
         </div>
       </div>
 
-      <div className="resultCard">
-        <p>
-          {uiText.summary.totalTime}:{" "}
-          {visibleCalculation
-            ? formatTime(visibleCalculation.minutes)
-            : uiText.common.emptyValue}
-        </p>
-        <p>
-          {uiText.summary.totalFuel}:{" "}
-          {visibleCalculation
-            ? `${formatNumber(visibleCalculation.fuelUsed)} ${uiText.common.units.kilograms}`
-            : uiText.common.emptyValue}
-        </p>
-        <p>
-          {uiText.summary.averageFuelPerHour}:{" "}
-          {visibleCalculation
-            ? `${formatNumber(visibleCalculation.fuelPerHour)} ${uiText.common.units.kilogramsPerHour}`
-            : uiText.common.emptyValue}
-        </p>
-
+      <CalculationResultCard
+        result={visibleCalculation}
+        labels={{
+          time: uiText.summary.totalTime,
+          fuel: uiText.summary.totalFuel,
+          fuelPerHour: uiText.summary.averageFuelPerHour,
+        }}
+      >
         {actualFuelEnd !== null && (
           <div className="actualFuelEnd">
             <span>{uiText.summary.actualFuelEnd}</span>
@@ -433,7 +422,7 @@ export function SummaryScreen({ initialEntry }: SummaryScreenProps) {
           defaultTitle={uiText.summary.title}
           source={visibleCalculation ? historySource : null}
         />
-      </div>
+      </CalculationResultCard>
     </section>
   );
 }
