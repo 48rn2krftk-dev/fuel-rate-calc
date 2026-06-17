@@ -4,8 +4,10 @@ import { normalizePinnedScreens } from "../navigation";
 const SETTINGS_KEY = "hotIdle.settings";
 const SLOTS_KEY = "hotIdle.slots";
 const HISTORY_KEY = "hotIdle.history";
+const STATIONS_KEY = "hotIdle.stations";
 const MAX_SLOTS = 3;
 const MAX_HISTORY_ITEMS = 50;
+const MAX_THU_STATIONS = 50;
 
 export function getSettings(): AppSettings {
   const raw = localStorage.getItem(SETTINGS_KEY);
@@ -14,6 +16,8 @@ export function getSettings(): AppSettings {
     return {
       normFuelPerHour: null,
       theme: "system",
+      layoutMode: "auto",
+      dateTimeInputMode: "friendly",
       pinnedScreenIds: normalizePinnedScreens(null),
     };
   }
@@ -32,12 +36,23 @@ export function getSettings(): AppSettings {
         parsed.theme === "system"
           ? parsed.theme
           : "system",
+      layoutMode:
+        parsed.layoutMode === "portrait" || parsed.layoutMode === "landscape"
+          ? parsed.layoutMode
+          : "auto",
+      dateTimeInputMode:
+        parsed.dateTimeInputMode === "calendar" ||
+        parsed.dateTimeInputMode === "asu"
+          ? parsed.dateTimeInputMode
+          : "friendly",
       pinnedScreenIds: normalizePinnedScreens(parsed.pinnedScreenIds),
     };
   } catch {
     return {
       normFuelPerHour: null,
       theme: "system",
+      layoutMode: "auto",
+      dateTimeInputMode: "friendly",
       pinnedScreenIds: normalizePinnedScreens(null),
     };
   }
@@ -143,5 +158,49 @@ export function subscribeHistoryChange(callback: () => void) {
 
   return () => {
     window.removeEventListener("hotIdle.historyChanged", callback);
+  };
+}
+
+export function getThuStations(): string[] {
+  const raw =
+    localStorage.getItem(STATIONS_KEY) ??
+    localStorage.getItem("hotIdle.thuStations");
+
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed
+          .filter((station): station is string => typeof station === "string")
+          .map((station) => station.trim())
+          .filter(Boolean)
+          .slice(0, MAX_THU_STATIONS)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveThuStation(station: string) {
+  const normalized = station.trim();
+  if (!normalized) return;
+
+  const stations = [
+    normalized,
+    ...getThuStations().filter(
+      (item) => item.toLowerCase() !== normalized.toLowerCase()
+    ),
+  ].slice(0, MAX_THU_STATIONS);
+
+  localStorage.setItem(STATIONS_KEY, JSON.stringify(stations));
+  window.dispatchEvent(new Event("hotIdle.thuStationsChanged"));
+}
+
+export function subscribeThuStationsChange(callback: () => void) {
+  window.addEventListener("hotIdle.thuStationsChanged", callback);
+
+  return () => {
+    window.removeEventListener("hotIdle.thuStationsChanged", callback);
   };
 }

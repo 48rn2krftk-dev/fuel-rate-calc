@@ -44,6 +44,8 @@ export type HistoryEntry = CalculationResult & {
 export type AppSettings = {
   normFuelPerHour: number | null;
   theme: "system" | "light" | "dark";
+  layoutMode: "auto" | "portrait" | "landscape";
+  dateTimeInputMode: "friendly" | "calendar" | "asu";
   pinnedScreenIds: PinnedScreenId[];
 };
 

@@ -172,12 +172,14 @@ h2 {
 .grid {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  min-width: 0;
 }
 
 .field span {
@@ -186,8 +188,17 @@ h2 {
   font-weight: 600;
 }
 
+.twoColumnGrid .field > span,
+.threeColumnGrid .field > span {
+  min-height: 34px;
+  display: flex;
+  align-items: flex-end;
+}
+
 .field input {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 50px;
   padding: 0 14px;
   border: 1px solid #d7deea;
@@ -201,6 +212,38 @@ h2 {
 .field input:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.settingsSubsection {
+  margin-top: 16px;
+}
+
+.settingsSubsectionTitle {
+  margin: 0 0 8px;
+  color: #475467;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.dateInputToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -1px;
+}
+
+.dateInputToolbar button {
+  min-width: 42px;
+  min-height: 32px;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.dateInputToolbar button:active {
+  transform: translateY(1px);
 }
 
 .secondaryButton {
@@ -499,16 +542,16 @@ h2 {
 
 .quickAccessList {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 10px;
   margin-top: 14px;
 }
 
 .quickAccessItem {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: 8px;
+  align-content: space-between;
+  padding: 10px;
   border: 1px solid #d7deea;
   border-radius: 16px;
   background: #f8fbff;
@@ -516,27 +559,29 @@ h2 {
 
 .quickAccessItem label {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 8px;
   cursor: pointer;
 }
 
 .quickAccessItem input {
-  width: 20px;
-  height: 20px;
+  order: 2;
+  width: 18px;
+  height: 18px;
   accent-color: #2563eb;
 }
 
 .quickAccessOrder {
   display: flex;
+  justify-content: flex-end;
   gap: 5px;
 }
 
 .quickAccessOrder button {
   display: inline-flex;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   align-items: center;
   justify-content: center;
   border: 0;
@@ -596,6 +641,7 @@ h2 {
 .threeColumnGrid {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .twoColumnGrid {
@@ -624,6 +670,183 @@ h2 {
 .sectionFormCard {
   display: grid;
   gap: 12px;
+}
+
+.thuHeaderCard,
+.thuOperationCard {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #d7deea;
+  border-radius: 20px;
+  background: #f8fbff;
+}
+
+.thuOperations,
+.thuGroupOperations {
+  display: grid;
+  gap: 10px;
+}
+
+.thuSectionsTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.thuSectionsTable {
+  width: 100%;
+  min-width: 0;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.thuSectionsTable th {
+  padding: 0 6px 7px;
+  color: #667085;
+  font-size: 12px;
+  text-align: left;
+}
+
+.thuSectionsTable td {
+  padding: 4px;
+  vertical-align: middle;
+}
+
+.thuSectionsTable input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 8px;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #152033;
+  font-size: 14px;
+}
+
+.thuSectionsTable input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.thuInlineAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  justify-self: start;
+}
+
+.sectionFuelResult {
+  display: inline-flex;
+  min-width: 70px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.thuSectionsTable th:nth-child(1),
+.thuSectionsTable th:nth-child(2) {
+  width: 15%;
+}
+
+.thuSectionsTable th:nth-child(3) {
+  width: 11%;
+}
+
+.thuSectionsTable th:nth-child(4),
+.thuSectionsTable th:nth-child(5),
+.thuSectionsTable th:nth-child(6) {
+  width: 16%;
+}
+
+.thuSectionsTable th:last-child {
+  width: 40px;
+}
+
+.sectionFuelResult.good {
+  background: #e8fff3;
+  color: #027a48;
+}
+
+.sectionFuelResult.bad {
+  background: #ffecec;
+  color: #b42318;
+}
+
+.sectionFuelResult.neutral {
+  background: #eef2f7;
+  color: #475467;
+}
+
+.iconDangerButton.mini {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+
+.thuGroupOperation {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #eef4ff;
+  color: #1d4ed8;
+}
+
+.thuGroupOperation small {
+  color: #475467;
+  line-height: 1.4;
+}
+
+.documentCard > .thuGroupOperations,
+.documentCard > .documentSections {
+  display: none;
+}
+
+.thuSavedTableWrap {
+  width: 100%;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.thuSavedTable {
+  width: 100%;
+  min-width: 760px;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.thuSavedTable th {
+  padding: 0 6px 7px;
+  color: #667085;
+  font-size: 12px;
+  text-align: left;
+}
+
+.thuSavedTable td {
+  padding: 5px 4px;
+  color: #344054;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.thuSavedTable tbody tr + tr td {
+  border-top: 1px solid #d7deea;
+}
+
+.thuSavedTable .sectionFuelResult {
+  min-width: 0;
+  width: 100%;
 }
 
 .documentFormActions {
@@ -708,15 +931,18 @@ h2 {
   gap: 10px;
 }
 
-.taxationPreview span.good {
+.taxationPreview span.good,
+.routeTaxation span.good {
   color: #027a48;
 }
 
-.taxationPreview span.bad {
+.taxationPreview span.bad,
+.routeTaxation span.bad {
   color: #b42318;
 }
 
-.taxationPreview span.neutral {
+.taxationPreview span.neutral,
+.routeTaxation span.neutral {
   color: #475467;
 }
 
@@ -1176,7 +1402,7 @@ h2 {
   line-height: 1.5;
 }
 
-@media (max-width: 460px) {
+@media (max-width: 720px) {
   .themeButton {
     flex-direction: column;
     gap: 3px;
@@ -1196,6 +1422,147 @@ h2 {
   .threeColumnGrid {
     grid-template-columns: 1fr;
   }
+
+  .thuHeaderCard,
+  .thuOperationCard,
+  .documentForm {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .thuHeaderCard > *,
+  .thuOperationCard > *,
+  .documentForm > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .thuHeaderCard .field input,
+  .thuHeaderCard .selectInput,
+  .thuOperationCard .field input,
+  .thuOperationCard .selectInput {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .thuSectionsTableWrap {
+    overflow-x: visible;
+  }
+
+  .thuSectionsTable,
+  .thuSavedTable,
+  .thuSectionsTable tbody,
+  .thuSavedTable tbody,
+  .thuSectionsTable tr,
+  .thuSavedTable tr,
+  .thuSectionsTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .thuSavedTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .thuSectionsTable thead,
+  .thuSavedTable thead {
+    display: none;
+  }
+
+  .thuSectionsTable tbody,
+  .thuSavedTable tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .thuSectionsTable tr,
+  .thuSavedTable tr {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #d7deea;
+    border-radius: 16px;
+    background: #ffffff;
+  }
+
+  .thuSectionsTable td,
+  .thuSavedTable td {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+  }
+
+  .thuSectionsTable td::before,
+  .thuSavedTable td::before {
+    content: attr(data-label);
+    color: #667085;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .thuSectionsTable .thuSectionActions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .thuSectionsTable .thuSectionActions::before {
+    content: none;
+  }
+
+  .thuSectionsTable input {
+    min-width: 0;
+  }
+
+  .sectionFuelResult {
+    justify-content: flex-start;
+  }
+
+  .thuSavedTable {
+    min-width: 0;
+  }
+
+  .thuSavedTableWrap {
+    overflow-x: visible;
+  }
+
+  .thuSavedTable tbody tr + tr td {
+    border-top: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .app.appLayout-auto,
+  .bottomNav.appLayout-auto,
+  .modalSheet {
+    max-width: 920px;
+  }
+
+  .app.appLayout-auto {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+}
+
+.app.appLayout-portrait,
+.bottomNav.appLayout-portrait {
+  max-width: 520px;
+}
+
+.app.appLayout-landscape,
+.bottomNav.appLayout-landscape {
+  max-width: 920px;
+}
+
+.app.appLayout-landscape {
+  padding-right: 22px;
+  padding-left: 22px;
 }
 
 .historyTitle {
@@ -1203,6 +1570,10 @@ h2 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.settingsHistoryCard {
+  display: none;
 }
 
 .historyTitle .sectionTitle {
@@ -1443,6 +1814,8 @@ h2 {
 
 .selectInput {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 50px;
   padding: 0 14px;
   border: 1px solid #d7deea;
@@ -1492,6 +1865,7 @@ h2 {
 :root[data-theme="dark"] .appEyebrow,
 :root[data-theme="dark"] .sectionTitle p,
 :root[data-theme="dark"] .field span,
+:root[data-theme="dark"] .settingsSubsectionTitle,
 :root[data-theme="dark"] .slotButtonMeta,
 :root[data-theme="dark"] .slotInfo p,
 :root[data-theme="dark"] .sectionLink small,
@@ -1517,6 +1891,7 @@ h2 {
 }
 
 :root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .dateInputToolbar button,
 :root[data-theme="dark"] .selectInput,
 :root[data-theme="dark"] .slotInfo,
 :root[data-theme="dark"] .historyCard,
@@ -1542,11 +1917,50 @@ h2 {
 
 :root[data-theme="dark"] .sectionFormCard,
 :root[data-theme="dark"] .documentCard,
+:root[data-theme="dark"] .thuHeaderCard,
+:root[data-theme="dark"] .thuOperationCard,
 :root[data-theme="dark"] .toggleField,
 :root[data-theme="dark"] .chainDocumentOption,
 :root[data-theme="dark"] .chainLinkCard {
   border-color: #334155;
   background: #101a2a;
+}
+
+:root[data-theme="dark"] .thuSectionsTable input {
+  border-color: #334155;
+  background: #0f1928;
+  color: #e8eef8;
+}
+
+:root[data-theme="dark"] .thuSectionsTable tr {
+  border-color: #334155;
+  background: #0f1928;
+}
+
+:root[data-theme="dark"] .thuSavedTable tr {
+  border-color: #334155;
+  background: #0f1928;
+}
+
+:root[data-theme="dark"] .thuSectionsTable th,
+:root[data-theme="dark"] .thuSectionsTable td::before,
+:root[data-theme="dark"] .thuSavedTable th,
+:root[data-theme="dark"] .thuSavedTable td::before,
+:root[data-theme="dark"] .thuGroupOperation small {
+  color: #9dacbf;
+}
+
+:root[data-theme="dark"] .thuSavedTable td {
+  color: #d2dbea;
+}
+
+:root[data-theme="dark"] .thuSavedTable tbody tr + tr td {
+  border-color: #334155;
+}
+
+:root[data-theme="dark"] .thuGroupOperation {
+  background: #172a4a;
+  color: #8eb6ff;
 }
 
 :root[data-theme="dark"] .correctionDocument,

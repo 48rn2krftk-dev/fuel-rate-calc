@@ -177,7 +177,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app appLayout-${appSettings.layoutMode}`}>
       <header className="appHeader">
         <div>
           <p className="appEyebrow">{uiText.app.eyebrow}</p>
@@ -271,7 +271,7 @@ export default function App() {
       </main>
 
       <nav
-        className="bottomNav"
+        className={`bottomNav appLayout-${appSettings.layoutMode}`}
         style={{
           gridTemplateColumns: `repeat(${appSettings.pinnedScreenIds.length + 1}, minmax(0, 1fr))`,
         }}

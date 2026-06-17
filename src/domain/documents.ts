@@ -17,7 +17,10 @@ export type ThuOperationType =
 
 export type ThuOperation = {
   id: string;
+  documentGroupId?: string;
   documentNumber: string;
+  driverName?: string;
+  station?: string;
   shiftStart: string;
   shiftEnd: string;
   operationType: ThuOperationType;
@@ -32,6 +35,9 @@ export type DriverRoute = {
   id: string;
   routeNumber: string;
   driverName: string;
+  departureStation?: string;
+  arrivalStation?: string;
+  callTime?: string;
   routeStart: string;
   routeEnd: string;
   sections: LocomotiveSection[];

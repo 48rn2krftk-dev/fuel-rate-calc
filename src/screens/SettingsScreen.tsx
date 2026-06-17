@@ -168,6 +168,28 @@ export function SettingsScreen({
     saveSettings(nextSettings);
   }
 
+  function handleLayoutModeChange(layoutMode: AppSettings["layoutMode"]) {
+    const nextSettings: AppSettings = {
+      ...settings,
+      layoutMode,
+    };
+
+    setSettings(nextSettings);
+    saveSettings(nextSettings);
+  }
+
+  function handleDateTimeInputModeChange(
+    dateTimeInputMode: AppSettings["dateTimeInputMode"]
+  ) {
+    const nextSettings: AppSettings = {
+      ...settings,
+      dateTimeInputMode,
+    };
+
+    setSettings(nextSettings);
+    saveSettings(nextSettings);
+  }
+
   function togglePinnedScreen(screenId: PinnedScreenId) {
     const isPinned = settings.pinnedScreenIds.includes(screenId);
 
@@ -311,6 +333,105 @@ export function SettingsScreen({
             {uiText.settings.theme.dark}
           </button>
         </div>
+
+        <div className="settingsSubsection">
+          <p className="settingsSubsectionTitle">
+            {uiText.settings.layoutModeLabel}
+          </p>
+
+          <div
+            className="themeSelector"
+            role="group"
+            aria-label={uiText.settings.layoutModeLabel}
+          >
+            <button
+              className={
+                settings.layoutMode === "auto"
+                  ? "themeButton active"
+                  : "themeButton"
+              }
+              type="button"
+              aria-pressed={settings.layoutMode === "auto"}
+              onClick={() => handleLayoutModeChange("auto")}
+            >
+              {uiText.settings.layoutMode.auto}
+            </button>
+            <button
+              className={
+                settings.layoutMode === "portrait"
+                  ? "themeButton active"
+                  : "themeButton"
+              }
+              type="button"
+              aria-pressed={settings.layoutMode === "portrait"}
+              onClick={() => handleLayoutModeChange("portrait")}
+            >
+              {uiText.settings.layoutMode.portrait}
+            </button>
+            <button
+              className={
+                settings.layoutMode === "landscape"
+                  ? "themeButton active"
+                  : "themeButton"
+              }
+              type="button"
+              aria-pressed={settings.layoutMode === "landscape"}
+              onClick={() => handleLayoutModeChange("landscape")}
+            >
+              {uiText.settings.layoutMode.landscape}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="sectionTitle">
+          <h2>{uiText.settings.inputTitle}</h2>
+          <p>{uiText.settings.inputDescription}</p>
+        </div>
+
+        <div
+          className="themeSelector"
+          role="group"
+          aria-label={uiText.settings.dateTimeInputModeLabel}
+        >
+          <button
+            className={
+              settings.dateTimeInputMode === "friendly"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.dateTimeInputMode === "friendly"}
+            onClick={() => handleDateTimeInputModeChange("friendly")}
+          >
+            {uiText.settings.dateTimeInputMode.friendly}
+          </button>
+          <button
+            className={
+              settings.dateTimeInputMode === "calendar"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.dateTimeInputMode === "calendar"}
+            onClick={() => handleDateTimeInputModeChange("calendar")}
+          >
+            {uiText.settings.dateTimeInputMode.calendar}
+          </button>
+          <button
+            className={
+              settings.dateTimeInputMode === "asu"
+                ? "themeButton active"
+                : "themeButton"
+            }
+            type="button"
+            aria-pressed={settings.dateTimeInputMode === "asu"}
+            onClick={() => handleDateTimeInputModeChange("asu")}
+          >
+            {uiText.settings.dateTimeInputMode.asu}
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -373,7 +494,7 @@ export function SettingsScreen({
         )}
       </div>
 
-      <div className="card">
+      <div className="card settingsHistoryCard">
         <div className="historyTitle">
           <div className="sectionTitle">
             <h2>{uiText.settings.historyTitle}</h2>
