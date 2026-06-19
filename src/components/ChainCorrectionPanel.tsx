@@ -1,4 +1,4 @@
-import { RotateCcw, Save, X } from "lucide-react";
+import { RotateCcw, Save, Wand2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NormComparison } from "./NormComparison";
 import { uiText } from "../content";
@@ -9,12 +9,16 @@ import type {
 import {
   analyzeChainLinks,
   calculateChainHotIdle,
+  getChainDocumentEnd,
+  getChainDocumentStart,
   sectionKey,
   sortChainDocuments,
+  type ChainLinkAnalysis,
   type ChainDocument,
 } from "../utils/chainAnalysis";
 import {
   applyChainCorrections,
+  buildChainCorrectionScenarios,
   buildChainCorrections,
   cloneChainDocuments,
   validateCorrectedChain,
@@ -40,14 +44,58 @@ function documentTitle(item: ChainDocument): string {
     : `ММ № ${item.document.routeNumber}`;
 }
 
-function resultLabel(value: number): string {
-  if (value > 0) return uiText.mmLibrary.economy;
-  if (value < 0) return uiText.mmLibrary.overrun;
-  return uiText.mmLibrary.zero;
+function compactDocumentTitle(item: ChainDocument): string {
+  return item.type === "thu"
+    ? `ТХУ ${item.document.documentNumber}`
+    : `ММ ${item.document.routeNumber}`;
 }
 
 function formatDateTimeInput(value: string): string {
   return value.slice(0, 16);
+}
+
+function formatDateTimeFromMs(value: number): string {
+  const date = new Date(value);
+  const pad = (part: number) => String(part).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function hasChainLinkIssue(link: ChainLinkAnalysis | undefined): boolean {
+  return Boolean(
+    link &&
+      (link.timeStatus !== "continuous" ||
+        link.locationStatus !== "continuous" ||
+        link.fuelGaps.some((gap) => gap.status !== "continuous"))
+  );
+}
+
+function getChainLinkIssueType(
+  link: ChainLinkAnalysis | undefined
+): "time" | "location" | "fuel" | null {
+  if (!link) return null;
+  if (link.timeStatus !== "continuous") return "time";
+  if (link.locationStatus !== "continuous") return "location";
+  if (link.fuelGaps.some((gap) => gap.status !== "continuous")) return "fuel";
+  return null;
+}
+
+function calculateRouteBalance(items: ChainDocument[]): number {
+  return items.reduce(
+    (sum, item) =>
+      item.type === "driverRoute" ? sum + item.document.creditedResult : sum,
+    0
+  );
+}
+
+function routeBalanceText(value: number): string {
+  if (Math.abs(value) < 0.000001) return `${uiText.mmLibrary.zero}: 0 кг`;
+
+  return value > 0
+    ? `${uiText.mmLibrary.economy}: ${formatNumber(value)} кг`
+    : `${uiText.mmLibrary.overrun}: ${formatNumber(Math.abs(value))} кг`;
 }
 
 export function ChainCorrectionPanel({
@@ -65,13 +113,37 @@ export function ChainCorrectionPanel({
     sortChainDocuments(applyChainCorrections(documents, chain.corrections))
   );
   const [error, setError] = useState("");
+  const [selectedLinkIndex, setSelectedLinkIndex] = useState(0);
 
   const links = analyzeChainLinks(corrected);
+  const issueLinkIndexes = links.flatMap((link, index) =>
+    hasChainLinkIssue(link) ? [index] : []
+  );
+  const effectiveSelectedLinkIndex = issueLinkIndexes.includes(
+    selectedLinkIndex
+  )
+    ? selectedLinkIndex
+    : issueLinkIndexes[0] ?? selectedLinkIndex;
+  const selectedLink = links[effectiveSelectedLinkIndex] ?? null;
   const hotIdleBefore = calculateChainHotIdle(originals);
   const hotIdleAfter = calculateChainHotIdle(corrected);
+  const routeBalanceBefore = calculateRouteBalance(originals);
+  const routeBalanceAfter = calculateRouteBalance(corrected);
+  const routeBalanceDelta = routeBalanceAfter - routeBalanceBefore;
   const corrections = buildChainCorrections(originals, corrected);
-  const instructionLines = useMemo(() => {
-    const lines: string[] = [];
+  const scenarios = useMemo(
+    () => buildChainCorrectionScenarios(originals, chain.tankCapacity),
+    [chain.tankCapacity, originals]
+  );
+  const instructionCards = useMemo(() => {
+    const cards: Array<{
+      title: string;
+      rows: Array<{
+        label: string;
+        before: string;
+        after: string;
+      }>;
+    }> = [];
 
     for (const item of corrected) {
       const original = originals.find(
@@ -79,6 +151,11 @@ export function ChainCorrectionPanel({
       );
       if (!original) continue;
       const title = documentTitle(item);
+      const rows: Array<{
+        label: string;
+        before: string;
+        after: string;
+      }> = [];
 
       if (item.type === "thu" && original.type === "thu") {
         if (
@@ -86,17 +163,19 @@ export function ChainCorrectionPanel({
             original.document.operationStart ||
           item.document.operationEnd !== original.document.operationEnd
         ) {
-          lines.push(
-            `${title}: время ${formatDateTimeInput(
+          rows.push({
+            label: "Время",
+            before: `${formatDateTimeInput(
               original.document.operationStart
             ).replace("T", " ")}–${formatDateTimeInput(
               original.document.operationEnd
-            ).replace("T", " ")} → ${formatDateTimeInput(
+            ).replace("T", " ")}`,
+            after: `${formatDateTimeInput(
               item.document.operationStart
             ).replace("T", " ")}–${formatDateTimeInput(
               item.document.operationEnd
-            ).replace("T", " ")}`
-          );
+            ).replace("T", " ")}`,
+          });
         }
       }
 
@@ -112,20 +191,164 @@ export function ChainCorrectionPanel({
           continue;
         }
 
-        lines.push(
-          `${title}, ${uiText.chains.sectionLabel(
-            sectionKey(section)
-          )}: топливо ${formatNumber(
-            sourceSection.fuelAtStart
-          )}/${formatNumber(sourceSection.fuelAtEnd)} → ${formatNumber(
-            section.fuelAtStart
-          )}/${formatNumber(section.fuelAtEnd)} кг`
-        );
+        rows.push({
+          label: uiText.chains.sectionLabel(sectionKey(section)),
+          before: `${formatNumber(sourceSection.fuelAtStart)} / ${formatNumber(
+            sourceSection.fuelAtEnd
+          )} кг`,
+          after: `${formatNumber(section.fuelAtStart)} / ${formatNumber(
+            section.fuelAtEnd
+          )} кг`,
+        });
       }
+
+      if (rows.length > 0) cards.push({ title, rows });
     }
 
-    return lines;
+    return cards;
   }, [corrected, originals]);
+
+  const selectedProblemRows = (() => {
+    if (!selectedLink) return [];
+
+    const rows: Array<{
+      title: string;
+      before: string;
+      after: string;
+    }> = [];
+
+    if (selectedLink.timeStatus === "gap") {
+      rows.push({
+        title: uiText.chains.neededTime,
+        before: formatDateTimeInput(
+          selectedLink.previous.type === "thu"
+            ? selectedLink.previous.document.operationEnd
+            : selectedLink.previous.document.routeEnd
+        ).replace("T", " "),
+        after: formatDateTimeInput(
+          selectedLink.next.type === "thu"
+            ? selectedLink.next.document.operationStart
+            : selectedLink.next.document.routeStart
+        ).replace("T", " "),
+      });
+    }
+
+    for (const gap of selectedLink.fuelGaps) {
+      if (
+        gap.status !== "gap" ||
+        gap.previousFuel === null ||
+        gap.nextFuel === null
+      ) {
+        continue;
+      }
+
+      rows.push({
+        title: `${uiText.chains.neededFuel}: ${uiText.chains.sectionLabel(
+          gap.sectionKey
+        )}`,
+        before: `${formatNumber(gap.previousFuel)} кг`,
+        after: `${formatNumber(gap.nextFuel)} кг`,
+      });
+    }
+
+    return rows;
+  })();
+
+  const selectedTimeFix = (() => {
+    if (!selectedLink || selectedLink.timeStatus !== "gap") return null;
+
+    const previousEndMs = new Date(getChainDocumentEnd(selectedLink.previous)).getTime();
+    const nextStartMs = new Date(getChainDocumentStart(selectedLink.next)).getTime();
+    const previousExtensionEndMs =
+      selectedLink.previous.type === "thu"
+        ? Math.min(
+            nextStartMs,
+            new Date(selectedLink.previous.document.shiftEnd).getTime()
+          )
+        : previousEndMs;
+    const nextExtensionStartMs =
+      selectedLink.next.type === "thu"
+        ? Math.max(
+            previousEndMs,
+            new Date(selectedLink.next.document.shiftStart).getTime()
+          )
+        : nextStartMs;
+    const canExtendPrevious =
+      selectedLink.previous.type === "thu" &&
+      previousExtensionEndMs > previousEndMs;
+    const canMoveNext =
+      selectedLink.next.type === "thu" &&
+      nextExtensionStartMs < nextStartMs;
+    const remainingStartMs = canExtendPrevious
+      ? previousExtensionEndMs
+      : previousEndMs;
+    const remainingEndMs = canMoveNext ? nextExtensionStartMs : nextStartMs;
+    const newThuFuelRows = selectedLink.fuelGaps.flatMap((gap) =>
+      gap.previousFuel !== null && gap.nextFuel !== null
+        ? [
+            {
+              section: uiText.chains.sectionLabel(gap.sectionKey),
+              start: formatNumber(gap.previousFuel),
+              end: formatNumber(gap.nextFuel),
+            },
+          ]
+        : []
+    );
+
+    return {
+      canExtendPrevious,
+      canMoveNext,
+      previousTarget: formatDateTimeFromMs(previousExtensionEndMs),
+      nextTarget: formatDateTimeFromMs(nextExtensionStartMs),
+      remainingStart:
+        remainingStartMs < remainingEndMs
+          ? formatDateTimeFromMs(remainingStartMs)
+          : null,
+      remainingEnd:
+        remainingStartMs < remainingEndMs
+          ? formatDateTimeFromMs(remainingEndMs)
+          : null,
+      station:
+        selectedLink.locationStatus === "continuous"
+          ? selectedLink.previousLocation
+          : null,
+      newThuFuelRows,
+    };
+  })();
+
+  const selectedFuelFixes = (() => {
+    if (!selectedLink) return [];
+
+    return selectedLink.fuelGaps.flatMap((gap) => {
+      if (
+        gap.status !== "gap" ||
+        gap.previousFuel === null ||
+        gap.nextFuel === null
+      ) {
+        return [];
+      }
+
+      const previousSection = selectedLink.previous.document.sections.find(
+        (section) => sectionKey(section) === gap.sectionKey
+      );
+      const nextSection = selectedLink.next.document.sections.find(
+        (section) => sectionKey(section) === gap.sectionKey
+      );
+
+      if (!previousSection || !nextSection) return [];
+
+      return [
+        {
+          sectionKey: gap.sectionKey,
+          sectionLabel: uiText.chains.sectionLabel(gap.sectionKey),
+          previousFuel: gap.previousFuel,
+          nextFuel: gap.nextFuel,
+          previousDoc: selectedLink.previous,
+          nextDoc: selectedLink.next,
+        },
+      ];
+    });
+  })();
 
   function updateThuTime(
     key: string,
@@ -247,207 +470,239 @@ export function ChainCorrectionPanel({
         </button>
       </div>
 
-      <div className="correctionDocuments">
-        {corrected.map((item, itemIndex) => {
-          const original = originals.find(
-            (entry) => documentKey(entry) === documentKey(item)
-          )!;
+      <div className="correctionFocus">
+        <h3>{uiText.chains.correctionFocusTitle}</h3>
+        <div className="correctionFocusFlow">
+          {corrected.map((item, index) => {
+            const link = links[index];
+            const hasIssue = hasChainLinkIssue(link);
+            const issueType = getChainLinkIssueType(link);
+            const breakClassName = [
+              "correctionFocusBreak",
+              hasIssue ? "hasIssue" : "",
+              issueType ? `${issueType}Issue` : "",
+              index === effectiveSelectedLinkIndex && hasIssue ? "active" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
-          return (
-            <div className="correctionDocument" key={documentKey(item)}>
-              <div className="correctionDocumentTitle">
-                <span className="chainIndex">{itemIndex + 1}</span>
-                <b>{documentTitle(item)}</b>
-              </div>
-
-              {item.type === "thu" ? (
-                <div className="twoColumnGrid">
-                  <label className="field">
-                    <span>{uiText.chains.operationStartAfter}</span>
-                    <input
-                      type="datetime-local"
-                      value={formatDateTimeInput(
-                        item.document.operationStart
-                      )}
-                      onChange={(event) =>
-                        updateThuTime(
-                          documentKey(item),
-                          "operationStart",
-                          event.target.value
-                        )
-                      }
-                    />
-                    <small>
-                      {uiText.chains.before}:{" "}
-                      {formatDateTimeInput(
-                        original.type === "thu"
-                          ? original.document.operationStart
-                          : ""
-                      ).replace("T", " ")}
-                    </small>
-                  </label>
-                  <label className="field">
-                    <span>{uiText.chains.operationEndAfter}</span>
-                    <input
-                      type="datetime-local"
-                      value={formatDateTimeInput(item.document.operationEnd)}
-                      onChange={(event) =>
-                        updateThuTime(
-                          documentKey(item),
-                          "operationEnd",
-                          event.target.value
-                        )
-                      }
-                    />
-                    <small>
-                      {uiText.chains.before}:{" "}
-                      {formatDateTimeInput(
-                        original.type === "thu"
-                          ? original.document.operationEnd
-                          : ""
-                      ).replace("T", " ")}
-                    </small>
-                  </label>
+            return (
+              <div className="correctionFocusGroup" key={documentKey(item)}>
+                <div className="correctionFocusDoc">
+                  {compactDocumentTitle(item)}
                 </div>
-              ) : (
-                <p className="lockedTimeHint">
-                  {uiText.chains.routeTimeLocked}
-                </p>
-              )}
-
-              <div className="correctionSections">
-                {item.document.sections.map((section) => {
-                  const originalSection = original.document.sections.find(
-                    (entry) => sectionKey(entry) === sectionKey(section)
-                  )!;
-
-                  return (
-                    <div
-                      className="correctionSection"
-                      key={sectionKey(section)}
-                    >
-                      <b>
-                        {uiText.chains.sectionLabel(sectionKey(section))}
-                      </b>
-                      <div className="twoColumnGrid">
-                        <label className="field">
-                          <span>{uiText.chains.fuelStartAfter}</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.001"
-                            value={section.fuelAtStart}
-                            onChange={(event) =>
-                              updateFuel(
-                                documentKey(item),
-                                sectionKey(section),
-                                "fuelAtStart",
-                                event.target.valueAsNumber
-                              )
-                            }
-                          />
-                          <small>
-                            {uiText.chains.before}:{" "}
-                            {formatNumber(originalSection.fuelAtStart)} кг
-                          </small>
-                        </label>
-                        <label className="field">
-                          <span>{uiText.chains.fuelEndAfter}</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.001"
-                            value={section.fuelAtEnd}
-                            onChange={(event) =>
-                              updateFuel(
-                                documentKey(item),
-                                sectionKey(section),
-                                "fuelAtEnd",
-                                event.target.valueAsNumber
-                              )
-                            }
-                          />
-                          <small>
-                            {uiText.chains.before}:{" "}
-                            {formatNumber(originalSection.fuelAtEnd)} кг
-                          </small>
-                        </label>
-                      </div>
-                    </div>
-                  );
-                })}
+                {link && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLinkIndex(index)}
+                    className={breakClassName}
+                  >
+                    {hasIssue ? "!" : "→"}
+                  </button>
+                )}
               </div>
-
-              {item.type === "driverRoute" && (
-                <div className="routeCorrectionResult">
-                  <span>
-                    {uiText.chains.before}:{" "}
-                    {resultLabel(
-                      original.type === "driverRoute"
-                        ? original.document.creditedResult
-                        : 0
-                    )}{" "}
-                    {formatNumber(
-                      Math.abs(
-                        original.type === "driverRoute"
-                          ? original.document.creditedResult
-                          : 0
-                      )
-                    )}{" "}
-                    кг
-                  </span>
-                  <span>
-                    {uiText.chains.after}:{" "}
-                    <b>
-                      {resultLabel(item.document.creditedResult)}{" "}
-                      {formatNumber(
-                        Math.abs(item.document.creditedResult)
-                      )}{" "}
-                      кг
-                    </b>
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      <div className="correctionAnalysis">
-        <h3>{uiText.chains.afterCorrection}</h3>
-        {links.map((link, index) => (
-          <div className="chainLinkCard" key={index}>
-            <b>
-              {index + 1} → {index + 2}
-            </b>
-            <span className={`chainStatus ${link.timeStatus}`}>
-              {link.timeStatus === "continuous"
-                ? uiText.chains.timeContinuous
-                : link.timeStatus === "gap"
-                  ? `${uiText.chains.timeGap}: ${formatTime(
-                      link.timeDifferenceMinutes
-                    )}`
-                  : `${uiText.chains.timeOverlap}: ${formatTime(
-                      Math.abs(link.timeDifferenceMinutes)
-                    )}`}
-            </span>
-            {link.fuelGaps.map((gap) => (
-              <span
-                className={`chainStatus fuel ${gap.status}`}
-                key={gap.sectionKey}
+      <div className="selectedBreakCard">
+        <h3>{uiText.chains.selectedBreakTitle}</h3>
+        {selectedProblemRows.length === 0 ? (
+          <p>{uiText.chains.noSelectedBreak}</p>
+        ) : (
+          <>
+            <div className="selectedBreakRows">
+              {selectedProblemRows.map((row) => (
+                <div className="selectedBreakRow" key={row.title}>
+                  <b>{row.title}</b>
+                  <span>{row.before}</span>
+                  <span>→</span>
+                  <span>{row.after}</span>
+                </div>
+              ))}
+            </div>
+
+            {selectedLink && selectedTimeFix && (
+              <div className="timeFixActions">
+                {selectedTimeFix.canExtendPrevious &&
+                  selectedLink.previous.type === "thu" && (
+                    <label className="timeFixAction">
+                      <span>
+                        Забрать в {documentTitle(selectedLink.previous)}
+                      </span>
+                      <input
+                        type="datetime-local"
+                        value={formatDateTimeInput(
+                          selectedLink.previous.document.operationEnd
+                        )}
+                        max={formatDateTimeInput(
+                          selectedLink.previous.document.shiftEnd
+                        )}
+                        onChange={(event) =>
+                          updateThuTime(
+                            documentKey(selectedLink.previous),
+                            "operationEnd",
+                            event.target.value
+                          )
+                        }
+                      />
+                      <small>
+                        Можно довести до {selectedTimeFix.previousTarget.replace(
+                          "T",
+                          " "
+                        )}
+                      </small>
+                    </label>
+                  )}
+
+                {selectedTimeFix.canMoveNext &&
+                  selectedLink.next.type === "thu" && (
+                    <label className="timeFixAction">
+                      <span>
+                        Забрать в {documentTitle(selectedLink.next)}
+                      </span>
+                      <input
+                        type="datetime-local"
+                        value={formatDateTimeInput(
+                          selectedLink.next.document.operationStart
+                        )}
+                        min={formatDateTimeInput(
+                          selectedLink.next.document.shiftStart
+                        )}
+                        onChange={(event) =>
+                          updateThuTime(
+                            documentKey(selectedLink.next),
+                            "operationStart",
+                            event.target.value
+                          )
+                        }
+                      />
+                      <small>
+                        Можно начать с {selectedTimeFix.nextTarget.replace(
+                          "T",
+                          " "
+                        )}
+                      </small>
+                    </label>
+                  )}
+
+                {selectedTimeFix.remainingStart &&
+                  selectedTimeFix.remainingEnd && (
+                    <div className="newThuInstruction">
+                      <b>{uiText.chains.newThuForGap}</b>
+                      <span>
+                        Ввести ТХУ-3 с{" "}
+                        {selectedTimeFix.remainingStart.replace("T", " ")} до{" "}
+                        {selectedTimeFix.remainingEnd.replace("T", " ")}
+                        {selectedTimeFix.station
+                          ? `, станция ${selectedTimeFix.station}`
+                          : ""}.
+                      </span>
+                      {selectedTimeFix.newThuFuelRows.map((row) => (
+                        <small key={row.section}>
+                          {row.section}: приёмка {row.start} кг, сдача{" "}
+                          {row.end} кг
+                        </small>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {selectedFuelFixes.length > 0 && (
+              <div className="fuelFixActions">
+                {selectedFuelFixes.map((fix) => (
+                  <div className="fuelFixAction" key={fix.sectionKey}>
+                    <b>{fix.sectionLabel}</b>
+                    <label>
+                      <span>
+                        Сдача в {documentTitle(fix.previousDoc)}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value={fix.previousFuel}
+                        onChange={(event) =>
+                          updateFuel(
+                            documentKey(fix.previousDoc),
+                            fix.sectionKey,
+                            "fuelAtEnd",
+                            event.target.valueAsNumber
+                          )
+                        }
+                      />
+                      <small>
+                        Чтобы совпало со следующим:{" "}
+                        {formatNumber(fix.nextFuel)} кг
+                      </small>
+                    </label>
+                    <label>
+                      <span>
+                        Приёмка в {documentTitle(fix.nextDoc)}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value={fix.nextFuel}
+                        onChange={(event) =>
+                          updateFuel(
+                            documentKey(fix.nextDoc),
+                            fix.sectionKey,
+                            "fuelAtStart",
+                            event.target.valueAsNumber
+                          )
+                        }
+                      />
+                      <small>
+                        Чтобы совпало с предыдущим:{" "}
+                        {formatNumber(fix.previousFuel)} кг
+                      </small>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="correctionScenarios">
+        <div className="correctionScenariosTitle">
+          <Wand2 size={18} />
+          <h3>{uiText.chains.scenariosTitle}</h3>
+        </div>
+        <div className="scenarioGrid">
+          {scenarios.map((scenario) => {
+            const scenarioText = uiText.chains.scenarios[scenario.id];
+            const disabled =
+              scenario.changedCount === 0 || scenario.validationError !== null;
+
+            return (
+              <button
+                className="scenarioButton"
+                type="button"
+                key={scenario.id}
+                disabled={disabled}
+                title={scenario.validationError ?? scenarioText.description}
+                onClick={() => {
+                  setCorrected(scenario.documents);
+                  setError("");
+                }}
               >
-                <b>{uiText.chains.sectionLabel(gap.sectionKey)}</b>
-                {gap.status === "continuous"
-                  ? uiText.chains.fuelContinuous
-                  : gap.status === "missing"
-                    ? uiText.chains.sectionMissing
-                    : `${uiText.chains.fuelGap}: ${
-                        gap.difference! > 0 ? "+" : ""
-                      }${formatNumber(gap.difference!)} кг`}
-              </span>
-            ))}
-          </div>
-        ))}
+                <b>{scenarioText.title}</b>
+                <span>{scenarioText.description}</span>
+                <small>
+                  {scenario.validationError
+                    ? uiText.chains.scenarioUnavailable
+                    : uiText.chains.scenarioChanges(scenario.changedCount)}
+                </small>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {(hotIdleBefore || hotIdleAfter) && (
@@ -471,21 +726,48 @@ export function ChainCorrectionPanel({
               />
             </>
           )}
+          <div className="routeBalanceComparison">
+            <b>{uiText.mmLibrary.taxationResult}</b>
+            <span>
+              {uiText.chains.before}: {routeBalanceText(routeBalanceBefore)}
+            </span>
+            <span>
+              {uiText.chains.after}: {routeBalanceText(routeBalanceAfter)}
+            </span>
+            <span
+              className={
+                routeBalanceDelta >= -0.000001 ? "good" : "bad"
+              }
+            >
+              Изменение: {routeBalanceDelta >= -0.000001 ? "+" : ""}
+              {formatNumber(routeBalanceDelta)} кг
+            </span>
+          </div>
         </div>
       )}
 
       <div className="paperInstructions">
         <h3>{uiText.chains.paperInstructions}</h3>
-        {instructionLines.length === 0 ? (
+        {instructionCards.length === 0 ? (
           <p>{uiText.chains.noCorrections}</p>
         ) : (
-          <ol>
-            {instructionLines.map((line) => (
-              <li key={line}>
-                {line}
-              </li>
+          <div className="paperInstructionCards">
+            {instructionCards.map((card) => (
+              <div className="paperInstructionCard" key={card.title}>
+                <b>{card.title}</b>
+                {card.rows.map((row) => (
+                  <div
+                    className="paperInstructionRow"
+                    key={`${card.title}-${row.label}`}
+                  >
+                    <span>{row.label}</span>
+                    <del>{row.before}</del>
+                    <strong>{row.after}</strong>
+                  </div>
+                ))}
+              </div>
             ))}
-          </ol>
+          </div>
         )}
       </div>
 

@@ -102,4 +102,57 @@ describe("chain analysis", () => {
     assert.equal(link.fuelGaps.length, 2);
     assert.ok(link.fuelGaps.every((gap) => gap.status === "missing"));
   });
+
+  it("keeps the location continuous from THU through a route to the next THU", () => {
+    const thuAtA: ThuOperation = {
+      ...thu,
+      station: "А",
+      operationEnd: "2026-06-15T10:00",
+      sections: [{ ...thu.sections[0], fuelAtEnd: 4900 }],
+    };
+    const routeAToB: DriverRoute = {
+      ...route,
+      departureStation: "А",
+      arrivalStation: "Б",
+      routeStart: "2026-06-15T10:00",
+      sections: [{ ...route.sections[0], fuelAtStart: 4900 }],
+    };
+    const thuAtB: ThuOperation = {
+      ...thu,
+      id: "thu-2",
+      station: "Б",
+      operationStart: "2026-06-15T18:00",
+      operationEnd: "2026-06-15T19:00",
+      sections: [{ ...thu.sections[0], fuelAtStart: 4500 }],
+    };
+    const links = analyzeChainLinks([
+      { type: "thu", document: thuAtA },
+      { type: "driverRoute", document: routeAToB },
+      { type: "thu", document: thuAtB },
+    ]);
+
+    assert.equal(links[0].locationStatus, "continuous");
+    assert.equal(links[1].locationStatus, "continuous");
+  });
+
+  it("detects a location gap after a driver route", () => {
+    const routeAToB: DriverRoute = {
+      ...route,
+      arrivalStation: "Б",
+    };
+    const thuAtWrongStation: ThuOperation = {
+      ...thu,
+      station: "В",
+      operationStart: "2026-06-15T18:00",
+      operationEnd: "2026-06-15T19:00",
+    };
+    const [link] = analyzeChainLinks([
+      { type: "driverRoute", document: routeAToB },
+      { type: "thu", document: thuAtWrongStation },
+    ]);
+
+    assert.equal(link.previousLocation, "Б");
+    assert.equal(link.nextLocation, "В");
+    assert.equal(link.locationStatus, "gap");
+  });
 });

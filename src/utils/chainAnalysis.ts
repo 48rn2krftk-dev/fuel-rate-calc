@@ -29,6 +29,9 @@ export type ChainLinkAnalysis = {
   next: ChainDocument;
   timeDifferenceMinutes: number;
   timeStatus: "continuous" | "gap" | "overlap";
+  previousLocation: string | null;
+  nextLocation: string | null;
+  locationStatus: "continuous" | "gap" | "missing";
   fuelGaps: ChainFuelGap[];
 };
 
@@ -54,6 +57,30 @@ export function getChainDocumentSections(
   return item.document.sections;
 }
 
+export function getChainDocumentStartLocation(
+  item: ChainDocument
+): string | null {
+  const location =
+    item.type === "thu"
+      ? item.document.station
+      : item.document.departureStation;
+
+  return location?.trim() ? location.trim() : null;
+}
+
+export function getChainDocumentEndLocation(
+  item: ChainDocument
+): string | null {
+  const location =
+    item.type === "thu" ? item.document.station : item.document.arrivalStation;
+
+  return location?.trim() ? location.trim() : null;
+}
+
+function normalizeLocation(value: string): string {
+  return value.trim().toLocaleLowerCase("ru-RU").replace(/\s+/g, " ");
+}
+
 export function sortChainDocuments(
   items: ChainDocument[]
 ): ChainDocument[] {
@@ -76,6 +103,14 @@ export function analyzeChainLinks(
     const timeDifferenceMinutes = Math.round(
       (nextStart - previousEnd) / 60000
     );
+    const previousLocation = getChainDocumentEndLocation(previous);
+    const nextLocation = getChainDocumentStartLocation(next);
+    const locationStatus =
+      previousLocation === null || nextLocation === null
+        ? "missing"
+        : normalizeLocation(previousLocation) === normalizeLocation(nextLocation)
+          ? "continuous"
+          : "gap";
     const previousSections = new Map(
       getChainDocumentSections(previous).map((section) => [
         sectionKey(section),
@@ -129,6 +164,9 @@ export function analyzeChainLinks(
           : timeDifferenceMinutes > 0
             ? "gap"
             : "overlap",
+      previousLocation,
+      nextLocation,
+      locationStatus,
       fuelGaps,
     };
   });

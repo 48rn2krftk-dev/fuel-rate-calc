@@ -1,4 +1,4 @@
-export const APP_VERSION = "тест-билд 0.1";
+export const APP_VERSION = "тест-билд 0.2";
 
 export const links = {
   github: "https://github.com/48rn2krftk-dev/fuel-rate-calc",
@@ -232,16 +232,31 @@ export const uiText = {
   chains: {
     title: "Топливные цепочки",
     description:
-      "Собери последовательность из ТХУ-3 и ММ. Порядок определяется автоматически по времени начала.",
-    add: "Создать цепочку",
-    edit: "Редактировать цепочку",
+      "Собери рабочий кусок многолетней истории локомотива из ТХУ-3 и ММ. При разрыве кусок можно расширить соседними документами.",
+    add: "Собрать кусок",
+    edit: "Расширить кусок",
     empty: "Топливных цепочек пока нет.",
     noDocuments:
       "Сначала создай хотя бы два документа ТХУ-3 или ММ.",
     titleLabel: "Название цепочки",
+    autoTitlePrefix: "Цепочка",
     tankCapacity: "Лимит бака, кг (необязательно)",
     tankCapacityError: "Введи положительный лимит вместимости бака.",
     documents: "Документы цепочки",
+    documentsDescription:
+      "Добавляй только нужный участок истории. Если для устранения разрыва не хватает соседних документов, расширь кусок через поиск.",
+    searchDocuments: "Поиск документов",
+    searchPlaceholder: "Тепловоз, дата, номер ТХУ/ММ, станция",
+    selectedDocuments: "В текущем куске",
+    noSelectedDocuments: "Документы ещё не добавлены.",
+    availableDocuments: "Добавить документы",
+    addDocumentsToPiece: "Расширить кусок",
+    newThuForGap: "Новая ТХУ-3",
+    createThu: "Создать ТХУ-3",
+    createRoute: "Создать ММ",
+    addDocument: "Добавить",
+    removeDocument: "Убрать документ",
+    documentsNotFound: "По этому запросу документов не найдено.",
     selectAtLeastTwo: "Выбери не менее двух документов.",
     save: "Сохранить цепочку",
     cancel: "Отмена",
@@ -254,11 +269,22 @@ export const uiText = {
     timeGap: "Разрыв времени",
     timeOverlap: "Перекрытие времени",
     timeContinuous: "Время непрерывно",
+    transition: "Переход",
     fuelGap: "Разрыв топлива",
     fuelContinuous: "Топливо непрерывно",
     sectionMissing: "Секция отсутствует в одном из документов",
+    locationGap: "Разрыв дислокации",
+    locationContinuous: "Дислокация сходится",
+    locationMissing: "Дислокация указана не полностью",
+    locationUnknown: "Станция не указана",
+    breakFound: "Есть разрыв",
+    createThuSuggestion: (period: string) =>
+      `Оформить на промежуток ${period}. В соседние ТХУ-3 это время не помещается.`,
     chainIsContinuous: "Разрывов между документами не найдено.",
     hotIdle: "Общий горячий простой",
+    heatingTime: "Время прогрева",
+    totalFuel: "Общий расход",
+    fuelPerHour: "Удельный расход",
     documentsCount: (count: number) => `${count} док.`,
     linksCount: (count: number) => `${count} переходов`,
     sectionLabel: (key: string) => key.replaceAll("|", "-"),
@@ -266,6 +292,33 @@ export const uiText = {
     correctionTitle: "Ручная корректировка",
     correctionDescription:
       "Исходные документы не изменяются. Здесь формируется черновик исправлений для бумажных ведомостей.",
+    correctionFocusTitle: "Где разрыв",
+    selectedBreakTitle: "Проблемное место",
+    neededTime: "Нужно закрыть время",
+    neededFuel: "Нужно свести топливо",
+    noSelectedBreak: "Выбери разрыв в цепочке сверху.",
+    manualFields: "Ручные поля",
+    scenariosTitle: "Автосценарии",
+    scenarioApply: "Применить",
+    scenarioUnavailable: "Недоступно",
+    scenarioChanges: (count: number) => `${count} правок`,
+    scenarios: {
+      "close-gaps": {
+        title: "Сохранить горячий простой",
+        description:
+          "Закрыть топливные разрывы так, чтобы не увеличивать горячий простой.",
+      },
+      "protect-routes": {
+        title: "Беречь ММ",
+        description:
+          "По возможности исправлять ТХУ-3, чтобы меньше менять результат маршрута.",
+      },
+      balanced: {
+        title: "Разделить разницу",
+        description:
+          "Разнести топливную поправку между соседними документами поровну.",
+      },
+    },
     operationStartAfter: "Начало операции — стало",
     operationEndAfter: "Окончание операции — стало",
     fuelStartAfter: "Топливо при приёмке — стало",

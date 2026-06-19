@@ -257,7 +257,7 @@ export default function App() {
           <DriverRouteLibraryScreen />
         )}
         {screen === "chains" && (
-          <FuelChainLibraryScreen />
+          <FuelChainLibraryScreen onOpenScreen={navigate} />
         )}
         {screen === "all" && (
           <AllSectionsScreen

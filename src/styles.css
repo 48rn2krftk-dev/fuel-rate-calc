@@ -661,10 +661,16 @@ h2 {
 
 .sectionFormCard,
 .documentCard {
+  width: 100%;
+  min-width: 0;
   padding: 14px;
   border: 1px solid #d7deea;
   border-radius: 20px;
   background: #f8fbff;
+}
+
+.chainCard {
+  overflow: hidden;
 }
 
 .sectionFormCard {
@@ -1017,11 +1023,218 @@ h2 {
   font-weight: 750;
 }
 
+.chainPickerHint,
+.chainSelectedDocuments,
+.chainSearchResults {
+  margin-top: 10px;
+}
+
+.chainSearchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chainSearchHeader > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
 .chainTimelineItem {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
+}
+
+.chainTileFlow {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  margin-top: 10px;
+  padding: 4px 2px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chainTileGroup {
+  display: flex;
+  align-items: flex-start;
+  flex: 0 0 auto;
+}
+
+.chainDocumentTile {
+  display: grid;
+  gap: 3px;
+  width: 118px;
+  min-height: 82px;
+  padding: 9px;
+  border: 1px solid #d7deea;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #1d2939;
+}
+
+.chainDocumentTile b {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.chainDocumentTile span,
+.chainDocumentTile small {
+  overflow: hidden;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chainBetween {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  width: 78px;
+  padding-top: 22px;
+}
+
+.chainBreakNode {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e8fff3;
+  color: #027a48;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #b7ebcf;
+}
+
+.chainBreakNode.hasIssue {
+  background: #fff3dc;
+  color: #8a5600;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #fdb022;
+}
+
+.chainBreakTile {
+  display: grid;
+  gap: 8px;
+  margin-left: 15px;
+  padding: 10px 10px 10px 16px;
+  border-left: 3px solid #12b76a;
+  border-radius: 0 14px 14px 0;
+  background: #f6fef9;
+}
+
+.chainBreakTile.hasIssue {
+  border-left-color: #f79009;
+  background: #fffbeb;
+}
+
+.chainBreakTile > b {
+  font-size: 13px;
+  color: #475467;
+}
+
+.chainSuggestion {
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff3dc;
+  color: #8a5600;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.chainInsertedThuTile {
+  display: grid;
+  gap: 4px;
+  width: 84px;
+  min-height: 54px;
+  padding: 7px;
+  border: 2px dashed #f79009;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #8a5600;
+}
+
+.chainInsertedThuTile summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.chainInsertedThuTile b {
+  font-size: 11px;
+}
+
+.chainInsertedThuTile small {
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chainAddDocumentsButton {
+  display: none;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c8d2e2;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.chainEdgeButton {
+  display: grid;
+  width: 78px;
+  min-height: 82px;
+  flex: 0 0 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 5px;
+  padding: 8px;
+  border: 1px dashed #7aa7ff;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.chainBreakDetails {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chainBreakDetail {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #d7deea;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.chainBreakDetail > b {
+  font-size: 13px;
+  color: #475467;
 }
 
 .chainIndex {
@@ -1077,6 +1290,21 @@ h2 {
   display: grid;
 }
 
+.chainStatus.location {
+  background: #eef2ff;
+  color: #3448a1;
+}
+
+.chainStatus.location.gap {
+  background: #fff3dc;
+  color: #8a5600;
+}
+
+.chainStatus.location.missing {
+  background: #f2f4f7;
+  color: #475467;
+}
+
 .iconButton.active {
   background: #2563eb;
   color: #ffffff;
@@ -1099,9 +1327,238 @@ h2 {
 
 .correctionDocuments,
 .correctionSections,
-.correctionAnalysis {
+.correctionAnalysis,
+.correctionScenarios,
+.scenarioGrid {
   display: grid;
   gap: 10px;
+}
+
+.correctionScenarios {
+  padding: 13px;
+  border: 1px solid #d7deea;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.correctionFocus,
+.selectedBreakCard,
+.correctionManualFields {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d7deea;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.correctionFocus h3,
+.selectedBreakCard h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.correctionFocusFlow {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.correctionFocusGroup {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.correctionFocusDoc {
+  width: 78px;
+  padding: 8px;
+  border: 1px solid #d7deea;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1d2939;
+  font-size: 12px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.correctionFocusBreak {
+  border: 0;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 8px;
+  border-radius: 50%;
+  background: #e8fff3;
+  color: #027a48;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.correctionFocusBreak.hasIssue {
+  background: #fff3dc;
+  color: #8a5600;
+}
+
+.correctionFocusBreak.fuelIssue {
+  background: #fde7ff;
+  color: #86198f;
+}
+
+.correctionFocusBreak.active {
+  box-shadow: 0 0 0 3px rgba(247, 144, 9, 0.22);
+}
+
+.selectedBreakRows,
+.paperInstructionCards {
+  display: grid;
+  gap: 8px;
+}
+
+.selectedBreakRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 13px;
+}
+
+.selectedBreakRow b {
+  min-width: 0;
+}
+
+.timeFixActions,
+.fuelFixActions {
+  display: grid;
+  gap: 8px;
+}
+
+.timeFixAction,
+.fuelFixAction {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.timeFixAction input,
+.fuelFixAction input {
+  width: 100%;
+  min-width: 0;
+}
+
+.timeFixAction span,
+.fuelFixAction span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeFixAction small,
+.fuelFixAction small,
+.newThuInstruction small {
+  color: #667085;
+  font-size: 12px;
+}
+
+.fuelFixAction label {
+  display: grid;
+  gap: 5px;
+}
+
+.newThuInstruction {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px dashed #f79009;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #8a5600;
+}
+
+.paperInstructionCard {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.paperInstructionRow {
+  display: grid;
+  grid-template-columns: minmax(86px, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.paperInstructionRow del {
+  color: #b42318;
+}
+
+.paperInstructionRow strong {
+  color: #027a48;
+}
+
+.correctionManualFields summary {
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.correctionScenariosTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #344054;
+}
+
+.correctionScenariosTitle h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.scenarioGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.scenarioButton {
+  display: grid;
+  gap: 5px;
+  min-height: 112px;
+  padding: 11px;
+  border: 1px solid #c8d2e2;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1d2939;
+  text-align: left;
+  cursor: pointer;
+}
+
+.scenarioButton:hover:not(:disabled) {
+  border-color: #2563eb;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+}
+
+.scenarioButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.scenarioButton span,
+.scenarioButton small {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #667085;
+}
+
+.scenarioButton small {
+  font-weight: 800;
 }
 
 .correctionDocument,
@@ -1152,11 +1609,44 @@ h2 {
   gap: 10px;
 }
 
+.routeBalanceComparison {
+  display: grid;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(71, 84, 103, 0.18);
+}
+
+.routeBalanceComparison b {
+  color: #1d2939;
+}
+
+.routeBalanceComparison span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.routeBalanceComparison .good {
+  color: #027a48;
+  font-weight: 800;
+}
+
+.routeBalanceComparison .bad {
+  color: #b42318;
+  font-weight: 800;
+}
+
 .hotIdleComparison h3,
 .paperInstructions h3,
 .correctionAnalysis h3 {
   margin: 0;
   font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .scenarioGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .paperInstructions ol {
@@ -1921,9 +2411,37 @@ h2 {
 :root[data-theme="dark"] .thuOperationCard,
 :root[data-theme="dark"] .toggleField,
 :root[data-theme="dark"] .chainDocumentOption,
-:root[data-theme="dark"] .chainLinkCard {
+:root[data-theme="dark"] .chainLinkCard,
+:root[data-theme="dark"] .chainDocumentTile {
   border-color: #334155;
   background: #101a2a;
+  color: #e8eef8;
+}
+
+:root[data-theme="dark"] .chainBreakNode {
+  box-shadow: 0 0 0 2px #131d2d, 0 0 0 3px #166534;
+}
+
+:root[data-theme="dark"] .chainBreakNode.hasIssue {
+  box-shadow: 0 0 0 2px #131d2d, 0 0 0 3px #d97706;
+}
+
+:root[data-theme="dark"] .chainAddDocumentsButton,
+:root[data-theme="dark"] .chainEdgeButton,
+:root[data-theme="dark"] .chainBreakDetail {
+  border-color: #334155;
+  background: #101a2a;
+}
+
+:root[data-theme="dark"] .chainBreakTile {
+  background: #12251f;
+}
+
+:root[data-theme="dark"] .chainBreakTile.hasIssue,
+:root[data-theme="dark"] .chainSuggestion,
+:root[data-theme="dark"] .chainInsertedThuTile {
+  background: #332614;
+  color: #ffd58a;
 }
 
 :root[data-theme="dark"] .thuSectionsTable input {
@@ -1964,9 +2482,37 @@ h2 {
 }
 
 :root[data-theme="dark"] .correctionDocument,
-:root[data-theme="dark"] .correctionSection {
+:root[data-theme="dark"] .correctionSection,
+:root[data-theme="dark"] .correctionScenarios,
+:root[data-theme="dark"] .correctionFocus,
+:root[data-theme="dark"] .selectedBreakCard,
+:root[data-theme="dark"] .correctionManualFields,
+:root[data-theme="dark"] .correctionFocusDoc,
+:root[data-theme="dark"] .selectedBreakRow,
+:root[data-theme="dark"] .timeFixAction,
+:root[data-theme="dark"] .fuelFixAction,
+:root[data-theme="dark"] .paperInstructionCard,
+:root[data-theme="dark"] .scenarioButton {
   border-color: #334155;
   background: #131d2d;
+}
+
+:root[data-theme="dark"] .correctionScenariosTitle,
+:root[data-theme="dark"] .scenarioButton {
+  color: #e8eef8;
+}
+
+:root[data-theme="dark"] .correctionFocusBreak.fuelIssue {
+  background: #4a174f;
+  color: #f5c0fe;
+}
+
+:root[data-theme="dark"] .routeBalanceComparison {
+  border-color: rgba(157, 172, 191, 0.22);
+}
+
+:root[data-theme="dark"] .routeBalanceComparison b {
+  color: #e8eef8;
 }
 
 :root[data-theme="dark"] .documentCardHeader p,
@@ -1974,12 +2520,21 @@ h2 {
 :root[data-theme="dark"] .toggleField small,
 :root[data-theme="dark"] .inheritanceHint,
 :root[data-theme="dark"] .chainDocumentOption small,
-:root[data-theme="dark"] .chainTimelineItem small {
+:root[data-theme="dark"] .chainTimelineItem small,
+:root[data-theme="dark"] .chainDocumentTile small,
+:root[data-theme="dark"] .chainDocumentTile span,
+:root[data-theme="dark"] .chainBreakTile > b,
+:root[data-theme="dark"] .chainBreakDetail > b {
   color: #9dacbf;
 }
 
 :root[data-theme="dark"] .correctionPanel .documentFormHeader p,
-:root[data-theme="dark"] .correctionPanel .field small {
+:root[data-theme="dark"] .correctionPanel .field small,
+:root[data-theme="dark"] .scenarioButton span,
+:root[data-theme="dark"] .scenarioButton small,
+:root[data-theme="dark"] .timeFixAction small,
+:root[data-theme="dark"] .fuelFixAction small,
+:root[data-theme="dark"] .newThuInstruction small {
   color: #9dacbf;
 }
 

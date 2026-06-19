@@ -6,6 +6,7 @@ import type {
 } from "../src/domain/documents.ts";
 import {
   applyChainCorrections,
+  buildChainCorrectionScenarios,
   buildChainCorrections,
   validateCorrectedChain,
 } from "../src/utils/chainCorrections.ts";
@@ -83,5 +84,77 @@ describe("chain corrections", () => {
       validateCorrectedChain([{ type: "thu", document: thu }], 900),
       "Корректировка превышает заданный лимит бака."
     );
+  });
+
+  it("builds a scenario that closes a fuel gap through the next document", () => {
+    const routeWithGap: DriverRoute = {
+      ...route,
+      sections: [{ ...route.sections[0], fuelAtStart: 930 }],
+    };
+    const scenario = buildChainCorrectionScenarios(
+      [
+        { type: "thu", document: thu },
+        { type: "driverRoute", document: routeWithGap },
+      ],
+      null
+    ).find((item) => item.id === "close-gaps")!;
+
+    assert.equal(scenario.validationError, null);
+    assert.equal(scenario.documents[1].document.sections[0].fuelAtStart, 950);
+    assert.equal(scenario.changedCount, 1);
+  });
+
+  it("closes a time gap in the hot idle preserving scenario", () => {
+    const routeAfterGap: DriverRoute = {
+      ...route,
+      routeStart: "2026-06-15T11:00",
+      sections: [{ ...route.sections[0], fuelAtStart: 950 }],
+    };
+    const scenario = buildChainCorrectionScenarios(
+      [
+        { type: "thu", document: thu },
+        { type: "driverRoute", document: routeAfterGap },
+      ],
+      null
+    ).find((item) => item.id === "close-gaps")!;
+
+    assert.equal(scenario.validationError, null);
+    assert.equal(scenario.documents[0].document.operationEnd, "2026-06-15T11:00");
+  });
+
+  it("can protect a driver route by correcting the previous THU", () => {
+    const routeWithGap: DriverRoute = {
+      ...route,
+      sections: [{ ...route.sections[0], fuelAtStart: 930 }],
+    };
+    const scenario = buildChainCorrectionScenarios(
+      [
+        { type: "thu", document: thu },
+        { type: "driverRoute", document: routeWithGap },
+      ],
+      null
+    ).find((item) => item.id === "protect-routes")!;
+
+    assert.equal(scenario.validationError, null);
+    assert.equal(scenario.documents[0].document.sections[0].fuelAtEnd, 930);
+    assert.equal(scenario.documents[1].document.sections[0].fuelAtStart, 930);
+  });
+
+  it("can split a fuel gap between adjacent documents", () => {
+    const routeWithGap: DriverRoute = {
+      ...route,
+      sections: [{ ...route.sections[0], fuelAtStart: 930 }],
+    };
+    const scenario = buildChainCorrectionScenarios(
+      [
+        { type: "thu", document: thu },
+        { type: "driverRoute", document: routeWithGap },
+      ],
+      null
+    ).find((item) => item.id === "balanced")!;
+
+    assert.equal(scenario.validationError, null);
+    assert.equal(scenario.documents[0].document.sections[0].fuelAtEnd, 940);
+    assert.equal(scenario.documents[1].document.sections[0].fuelAtStart, 940);
   });
 });
